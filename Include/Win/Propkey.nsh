@@ -51,8 +51,13 @@ WTypes.h
 /**************************************************
 OAIdl.h
 **************************************************/
-!define /ifndef SYSSIZEOF_VARIANT 16
-!define /ifndef SYSSTRUCT_VARIANT (&i2,&i6,&i8)
+!if "${NSIS_PTR_SIZE}" > 4
+!define SYSSIZEOF_VARIANT 24
+!define SYSSTRUCT_VARIANT (&i2,&i6,&i8,&i8)
+!else
+!define SYSSIZEOF_VARIANT 16
+!define SYSSTRUCT_VARIANT (&i2,&i6,&i8)
+!endif
 
 
 /**************************************************
@@ -162,18 +167,18 @@ System::Call 'OLEAUT32::#12(p${pDstV},p${pSrcV},i${Flags},i${VT})i.${sysretHR}' 
 
 
 !macro PropVariantClear pPV
-System::Call 'OLE32::PropVariantClear(p${pV})' ; WinNT4.SP0+, Win98+, IE4+
+System::Call 'OLE32::PropVariantClear(p${pPV})' ; WinNT4.SP0+, Win98+, IE4+
 !macroend
-!macro PropVariantCopy pDstV pSrcV sysretHR
-System::Call 'OLE32::PropVariantCopy(p${pDstV},p${pSrcV})i.${sysretHR}' ; WinNT4.SP0+, Win98+, IE4+ (Does NOT free the destination before it copies the source)
+!macro PropVariantCopy pDstPV pSrcPV sysretHR
+System::Call 'OLE32::PropVariantCopy(p${pDstPV},p${pSrcPV})i.${sysretHR}' ; WinNT4.SP0+, Win98+, IE4+ (Does NOT free the destination before it copies the source)
 !macroend
-!macro PropVariantChangeType pDstV pSrcV VT sysretHR
+!macro PropVariantChangeType pDstPV pSrcPV VT sysretHR
 !ifdef NSIS_ARM | NSIS_ARM32 | NSIS_ARMNT | NSIS_ARM64
-  System::Call 'PROPSYS::PropVariantChangeType(p${pDstV},p${pSrcV},i0,i${VT})i.${sysretHR}'
+  System::Call 'PROPSYS::PropVariantChangeType(p${pDstPV},p${pSrcPV},i0,i${VT})i.${sysretHR}'
 !else
   Push "${VT}"
-  Push ${pSrcV}
-  Push ${pDstV}
+  Push ${pSrcPV}
+  Push ${pDstPV}
   !include Util.nsh
   ${CallArtificialFunction} TryPropVariantChangeType
   System::Call 'KERNEL32::SetLastError(is${sysretHR})' ; A hack to move the result from the stack to somewhere with System variable syntax
