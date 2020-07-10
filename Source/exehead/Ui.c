@@ -1236,21 +1236,18 @@ static void FORCE_INLINE NSISCALL RefreshComponents(HWND hwTree, HTREEITEM *item
     TreeView_SetItem(hwTree, &item);
   }
 
-  // workaround for bug #1397031
+  // workaround for bug #1397031 A.K.A #434
   //
-  // windows 95 doesn't erase the background of the state image
-  // before it draws a new one. because of this parts of the old
+  // Windows 95 & NT4 doesn't erase the background of the state image
+  // before it draws a new one. Because of this parts of the old
   // state image will show where the new state image is masked.
   //
-  // to solve this, the following line forces the background to
-  // be erased. sadly, this redraws the entire control. it might
+  // To solve this, the following line forces the background to
+  // be erased. sadly, this redraws the entire control. It might
   // be a good idea to figure out where the state images are and
   // redraw only those.
 
-  // [Marius]
-  // this workaround creates heavy flickering
-  // and it's not necessary in NT4+
-  if (LOWORD(g_WinVer) < MAKEWORD(4, 0))
+  if (IsWin95NT4()) // Checking for < IE4 is probably better but more work
     InvalidateRect(hwTree, NULL, TRUE);
 }
 
@@ -1341,26 +1338,25 @@ static INT_PTR CALLBACK SelProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
     HTREEITEM Par;
     HBITMAP hBMcheck1;
     int x, i, noCombo=2;
-    int cx=GetSystemMetrics(SM_CXSMICON), cy=GetSystemMetrics(SM_CYSMICON);
 
     g_SectionHack=hwndDlg;
 
     hTreeItems=(HTREEITEM*)GlobalAlloc(GPTR,sizeof(HTREEITEM)*num_sections);
 
-    hBMcheck1=LoadImage(g_hInstance, MAKEINTRESOURCE(IDB_BITMAP1), IMAGE_BITMAP, cx*6, cy, LR_DEFAULTCOLOR); // LR_CREATEDIBSECTION required to load TopDown bitmaps but that breaks modern.bmp
+    hBMcheck1=LoadImage(g_hInstance, MAKEINTRESOURCE(IDB_BITMAP1), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR); // LR_CREATEDIBSECTION required to load TopDown bitmaps but that breaks modern.bmp
 
     last_selected_tree_item=-1;
     oldTreeWndProc=(WNDPROC)SetWindowLongPtr(hwndTree1,GWLP_WNDPROC,(LONG_PTR)newTreeWndProc);
 
-    hImageList = ImageList_Create(cx,cy, ILC_COLOR32|ILC_MASK, 6, 0);
+    hImageList = ImageList_Create(16,16, ILC_COLOR32|ILC_MASK, 6, 0);
     ImageList_AddMasked(hImageList,hBMcheck1,RGB(255,0,255));
 
     {
       const HIMAGELIST UNUSED hDummy1 = TreeView_SetImageList(hwndTree1, hImageList, TVSIL_STATE);
     }
 
-    if (TreeView_GetItemHeight(hwndTree1) < cy)
-      TreeView_SetItemHeight(hwndTree1, cy);
+    if (TreeView_GetItemHeight(hwndTree1) < 16)
+      TreeView_SetItemHeight(hwndTree1, 16);
 
     DeleteObject(hBMcheck1);
 
