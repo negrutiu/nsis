@@ -37,14 +37,23 @@ def setup_mingw_environ(arch):
         return None
     if arch == 'x86': bitness = '32'
     if arch == 'amd64': bitness = '64'
+
+    msysdir = None
+    for subdir in ['msys64', 'msys2']:
+        if path.exists(sh := path.join(os.environ['SystemDrive'] + path.sep, subdir, 'usr', 'bin', 'sh.exe')):
+            msysdir = path.join(os.environ['SystemDrive'] + path.sep, subdir)
+            break
+    if not msysdir: raise Exception('msys2 not found')
+    os.environ["PATH"] = path.join(msysdir, 'usr', 'bin') + os.pathsep + os.environ["PATH"]   # i.e r"C:\msys64\usr\bin"
+
     mingwdir = None
-    for msys in ['msys64', 'msys2']:
-        if path.exists(gcc := path.join(os.environ['SystemDrive'] + path.sep, msys, f'mingw{bitness}', 'bin', 'gcc.exe')):
-            mingwdir = path.dirname(gcc)
+    for subdir in [path.join(msysdir, f'mingw{bitness}'), f'mingw{bitness}']:
+        if path.exists(gcc := path.join(os.environ['SystemDrive'] + path.sep, subdir, 'bin', 'gcc.exe')):
+            mingwdir = path.join(os.environ['SystemDrive'] + path.sep, subdir)
             break
     if not mingwdir: raise Exception(f"mingw{bitness} not found")
-    os.environ["PATH"] = path.normpath(mingwdir + '/../../usr/bin') + os.pathsep + os.environ["PATH"]   # i.e r"C:\msys64\usr\bin"
-    os.environ["PATH"] = mingwdir + os.pathsep + os.environ["PATH"]     # i.e. r"C:\msys64\mingw32\bin\gcc.exe"
+    os.environ["PATH"] = path.join(mingwdir, 'bin') + os.pathsep + os.environ["PATH"]     # i.e. r"C:\msys64\mingw32\bin", r"C:\mingw32\bin"
+
     return mingwdir
 
 def setup_msvc_environ(arch):
