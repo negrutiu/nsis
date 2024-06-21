@@ -170,6 +170,8 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir, nsislog=True
     print('====================================================================================')
     compiler = validate_compiler(compiler)
     arch = validate_arch(arch)
+    if os.name == 'nt' and compiler == 'mingw':
+        setup_mingw_environ(arch)
     if os.name == 'nt':
         if path.exists(path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
             os.environ['PATH'] += os.pathsep + path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')     # NSIS.chm
