@@ -28,6 +28,10 @@ jobs:
         compiler: [gcc]
         include:
           - os: windows-latest
+            arch: x86
+            compiler: msvc
+          - os: windows-latest
+            arch: amd64
             compiler: msvc
     
     runs-on: ${{ matrix.os }}
