@@ -15,9 +15,12 @@ def posix_path(path):
 
 def setup_mingw_environ(arch):
     """
-    Add `mingw` location to `PATH`.
+    Based on the target architecture, this function:
+    - Looks for `msys2` installation directory and adds it to `PATH`
+    - Looks for `mingw-w64` installation directory and adds it to `PATH`
+
     Returns:
-      Dictionary containing `msysdir`, `mingwdir`.
+      Dictionary `{"msysdir": str, "mingwdir": str}`
     """
     if os.name != 'nt':
         return None
@@ -47,9 +50,13 @@ def setup_mingw_environ(arch):
 
 def setup_msvc_environ(arch):
     """
-    Add `vcvarsall.bat` location to `PATH`. \n
+    This function:
+    - Looks for Visual Studio and adds the location of `vcvarsall.bat` to `PATH`
+    - Guesses the platform toolset name (i.e. `v143`, `v142`, etc.)
+    - Converts the target arch (x86|amd64) to Visual C++ arch (Win32|x64)
+
     Returns:
-      Dictionary containing `installationPath`, `platformToolset`, `archName` values.
+      Dictionary `{"installationPath": str, "platformToolset": str, "archName": str}`
     """
     if os.name != 'nt':
         return None
@@ -84,6 +91,7 @@ def setup_msvc_environ(arch):
     return {'installationPath': instPath, 'platformToolset': toolset, 'archName': vsarch}
 
 def setup_environ(compiler, arch):
+    """ Validate `compiler` and `arch` and set up the environment for them. """
     if compiler == 'mingw': compiler = 'gcc'
     if compiler != 'gcc' and compiler != 'msvc': raise Exception(f"unknown compiler {compiler}")
     if compiler == 'msvc' and os.name != 'nt': raise Exception(f"{compiler} not available on {os.name}")
@@ -101,6 +109,7 @@ def setup_environ(compiler, arch):
     return [compiler, arch, vars]
 
 def git_checkout(url, dir, depth = 1):
+    """ Clone or Pull a git repository. """
     curdir = path.curdir
     if path.exists(path.join(dir, '.git')):
         os.chdir(dir)
@@ -167,6 +176,10 @@ def build_cppunit(compiler, arch, cppunitdir):
         raise OSError(exitcode, f"failed to build cppunit")
 
 def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions = ['test', 'dist']):
+    """
+    Build a NSIS distribution package. \n
+    `zlib` and `cppunit` must be built as well.
+    """
     compiler, arch, vars = setup_environ(compiler, arch)
     if os.name == 'nt':
         if path.exists(path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
