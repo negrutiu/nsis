@@ -570,6 +570,8 @@ if 'ZLIB_W32' in defenv:
 	for name, value in defenv._dict.items():
 		if name.find('ZLIB') != -1 or name.find('APPEND') != -1:
 			print(f"-- {name} = ({type(value)}){value}")
+	for p in os.environ['PATH'].split(os.pathsep):
+		print(f"++ {p}")
 
 tools = defenv['TOOLS']
 
