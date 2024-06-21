@@ -122,10 +122,10 @@ jobs:
           build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
 
       - name: CppUnit Debug
+        if: startsWith(matrix.os, 'macos')
         run: |
             gcc --version
             gcc-13 --version
-            exit(0)
 
       - name: CppUnit Checkout & Build
         shell: python
