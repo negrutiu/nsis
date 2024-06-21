@@ -92,12 +92,13 @@ def setup_environ(compiler, arch):
     if arch == 'x64': arch = 'amd64'
     if arch != 'x86' and arch != 'amd64': raise Exception(f"unknown arch {arch}")
 
+    vars = {}
     if compiler == 'gcc':
-        setup_mingw_environ(arch)
+        vars = setup_mingw_environ(arch)
     elif compiler == 'msvc':
-        setup_msvc_environ(arch)
+        vars = setup_msvc_environ(arch)
 
-    return [compiler, arch]
+    return [compiler, arch, vars]
 
 def git_checkout(url, dir, depth = 1):
     curdir = path.curdir
@@ -118,7 +119,7 @@ def git_checkout(url, dir, depth = 1):
         raise OSError(exitcode, f"failed to pull zlib")    
 
 def build_zlib(compiler, arch, zlibdir):
-    compiler, arch = setup_environ(compiler, arch)
+    compiler, arch, vars = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(zlibdir)
     if compiler == 'gcc':
@@ -141,7 +142,7 @@ def build_cppunit(compiler, arch, cppunitdir):
     if path.exists(path.join(cppunitdir, 'output', 'bin', 'DllPlugInTester.exe')):
         print("cppunit already built.")
         return
-    compiler, arch = setup_environ(compiler, arch)
+    compiler, arch, vars = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(cppunitdir)
     if compiler == 'gcc':
@@ -158,7 +159,7 @@ def build_cppunit(compiler, arch, cppunitdir):
             exitcode = Popen(args).wait()
             if exitcode != 0: raise OSError(exitcode, f"failed to build cppunit")
     elif compiler == 'msvc':
-        args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'CppUnitLibraries2010.sln'), '/p:Configuration=Release', f'/p:Platform={msvc["archName"]}', f'/p:PlatformToolset={msvc["platformToolset" ]}']
+        args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'CppUnitLibraries2010.sln'), '/p:Configuration=Release', f'/p:Platform={vars["archName"]}', f'/p:PlatformToolset={vars["platformToolset" ]}']
         print(f'-- {args}')
         exitcode = Popen(args).wait()
     os.chdir(curdir)
@@ -166,7 +167,7 @@ def build_cppunit(compiler, arch, cppunitdir):
         raise OSError(exitcode, f"failed to build cppunit")
 
 def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions = ['test', 'dist']):
-    compiler, arch = setup_environ(compiler, arch)
+    compiler, arch, vars = setup_environ(compiler, arch)
     if os.name == 'nt':
         if path.exists(path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
             os.environ['PATH'] += os.pathsep + path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')     # NSIS.chm
