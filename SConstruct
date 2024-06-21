@@ -568,7 +568,7 @@ if 'ZLIB_W32' in defenv:
 			defenv[key] = os.path.join(os.path.abspath(os.curdir), defenv[key])
 
 	for name, value in defenv._dict.items():
-		if name.find('ZLIB') != -1:
+		if name.find('ZLIB') != -1 or name.find('APPEND') != -1:
 			print(f"-- {name} = ({type(value)}){value}")
 
 tools = defenv['TOOLS']

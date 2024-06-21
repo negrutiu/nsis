@@ -131,6 +131,10 @@ jobs:
             git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
             build_cppunit(r'${{matrix.compiler}}', r'${{matrix.arch}}', cppunitdir)
 
+      - name: CppUnit Debug
+        shell: pwsh
+        run: Get-ChildItem -Path '${{github.workspace}}/cppunit/output' -Recurse -File | %{$_.FullName}
+
       - name: Build NSIS
         working-directory: nsis
         shell: python
