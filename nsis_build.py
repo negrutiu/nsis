@@ -8,24 +8,6 @@ from nsis_version import *
 # pacman -S mingw-w64-x86_64-toolchain
 # pacman -S libtool autoconf-wrapper automake-wrapper     (cppunit)
 
-def validate_compiler(compiler):
-    if compiler == 'mingw':
-        compiler = 'gcc'
-    if compiler != 'gcc' and compiler != 'msvc':
-        raise Exception(f"unknown compiler {compiler}")
-    if compiler == 'msvc' and os.name != 'nt':
-        raise Exception(f"{compiler} not available on {os.name}")
-    return compiler
-    
-def validate_arch(arch):
-    if arch == "Win32":
-        arch = 'x86'
-    if arch == 'x64':
-        arch = 'amd64'
-    if arch != 'x86' and arch != 'amd64':
-        raise Exception(f"unknown arch {arch}")
-    return arch
-
 def posix_path(path):
     if path[1] == ':':
         return '/' + path.replace(':', '').replace('\\', '/')
@@ -88,12 +70,33 @@ def setup_msvc_environ(arch):
     if jout[0]['catalog']['productLineVersion'] == '2017': toolset = 'v141'
     print(f"-- platformToolset = {toolset}")
 
-    # arch
+    # VC platform name
     vsarch = arch
     if vsarch == 'x86': vsarch = 'Win32'
     if vsarch == 'amd64': vsarch = 'x64'
 
     return {'installationPath': instPath, 'platformToolset': toolset, 'archName': vsarch}
+
+def setup_environ(compiler, arch):
+    if compiler == 'mingw':
+        compiler = 'gcc'
+    if compiler != 'gcc' and compiler != 'msvc':
+        raise Exception(f"unknown compiler {compiler}")
+    if compiler == 'msvc' and os.name != 'nt':
+        raise Exception(f"{compiler} not available on {os.name}")
+
+    if arch == "Win32":
+        arch = 'x86'
+    if arch == 'x64':
+        arch = 'amd64'
+    if arch != 'x86' and arch != 'amd64':
+        raise Exception(f"unknown arch {arch}")
+
+    if compiler == 'gcc':
+        setup_mingw_environ(arch)
+    elif compiler == 'msvc':
+        setup_msvc_environ(arch)
+    return [compiler, arch]
 
 def git_checkout(url, dir, depth = 1):
     print('====================================================================================')
@@ -116,13 +119,11 @@ def git_checkout(url, dir, depth = 1):
 
 def build_zlib(compiler, arch, zlibdir):
     print('====================================================================================')
-    compiler = validate_compiler(compiler)
-    arch = validate_arch(arch)
+    compiler, arch = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(zlibdir)
     if compiler == 'gcc':
         if os.name == 'nt':
-            setup_mingw_environ(arch)
             args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-static', 'zlib1.dll']
         else:
             prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
@@ -130,7 +131,6 @@ def build_zlib(compiler, arch, zlibdir):
         print(f"-- {args}")
         exitcode = Popen(args).wait()
     elif compiler == 'msvc':
-        setup_msvc_environ(arch)
         args = [f'cmd.exe', '/c', 'call', "vcvarsall.bat", arch, '&&', 'nmake.exe', '-f', 'win32/Makefile.msc', f'LOC=/MT', 'zlib1.dll', 'zdll.lib']
         print(f"-- {args}")
         exitcode = Popen(args).wait()
@@ -143,14 +143,12 @@ def build_cppunit(compiler, arch, cppunitdir):
     if path.exists(path.join(cppunitdir, 'output', 'bin', 'DllPlugInTester.exe')):
         print("cppunit already built.")
         return
-    compiler = validate_compiler(compiler)
-    arch = validate_arch(arch)
+    compiler, arch = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(cppunitdir)
     if compiler == 'gcc':
         prefix = ''
         if os.name == 'nt':
-            setup_mingw_environ(arch)
             prefix = 'mingw32-'
         for args in [
             ['sh', './autogen.sh'],
@@ -162,7 +160,6 @@ def build_cppunit(compiler, arch, cppunitdir):
             exitcode = Popen(args).wait()
             if exitcode != 0: raise OSError(exitcode, f"failed to build cppunit")
     elif compiler == 'msvc':
-        msvc = setup_msvc_environ(arch)
         args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'CppUnitLibraries2010.sln'), '/p:Configuration=Release', f'/p:Platform={msvc["archName"]}', f'/p:PlatformToolset={msvc["platformToolset" ]}']
         print(f'-- {args}')
         exitcode = Popen(args).wait()
@@ -172,10 +169,7 @@ def build_cppunit(compiler, arch, cppunitdir):
 
 def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions = ['test', 'dist']):
     print('====================================================================================')
-    compiler = validate_compiler(compiler)
-    arch = validate_arch(arch)
-    if os.name == 'nt' and compiler == 'gcc':
-        setup_mingw_environ(arch)
+    compiler, arch = setup_environ(compiler, arch)
     if os.name == 'nt':
         if path.exists(path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
             os.environ['PATH'] += os.pathsep + path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')     # NSIS.chm
