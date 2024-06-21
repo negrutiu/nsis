@@ -23,9 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.x']  # 2.x is supported but EOL on GitHub Actions
         os: [windows-latest] # [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12, macos-13, windows-latest]  # TODO fails to find cppunit macos-14
-        log: [True, False]
         arch: [x86, amd64]
         compiler: [gcc]
         include:
@@ -47,7 +45,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.x'
 
       - name: Choco Dependencies
         if: startsWith(matrix.os, 'windows')
@@ -127,10 +125,9 @@ jobs:
             # ----- nsis_build.py -----
             zlibdir = os.path.join(r'${{github.workspace}}', 'zlib')
             cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
-            build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=${{matrix.log}}, nsismaxstrlen=4096, actions=['test', 'dist-zip'])
+            build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist-zip'])
 
       - name: Upload Artifacts
-        if: matrix.log == 'yes'
         uses: actions/upload-artifact@v4
         with:
           name: dist-${{matrix.arch}}_${{matrix.os}}_${{matrix.compiler}}
