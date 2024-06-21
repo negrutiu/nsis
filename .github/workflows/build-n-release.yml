@@ -41,7 +41,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install gcc scons mingw-w64 automake libtool
-          gcc --version
+          brew update && brew outdated && brew upgrade && brew cleanup
 
       - name: Apt Dependencies
         if: startsWith(matrix.os, 'ubuntu')
@@ -126,27 +126,11 @@ jobs:
         run: |
             gcc --version
             gcc-13 --version
+            g++-13 --version
 
       - name: CppUnit Checkout & Build
-        if: "!startsWith(matrix.os, 'macos')"
         shell: python
         working-directory: nsis
-        run: |
-            import sys, os
-            sys.path.insert(0, os.path.join(r'${{github.workspace}}', r'nsis'))
-            from nsis_build import *
-            # ----- nsis_build.py -----
-            cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
-            git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
-            build_cppunit(r'${{matrix.compiler}}', r'${{matrix.arch}}', cppunitdir)
-
-      - name: CppUnit Checkout & Build (macos)
-        if: startsWith(matrix.os, 'macos')
-        shell: python
-        working-directory: nsis
-        env:
-          CC: gcc-13
-          CXX: g++-13
         run: |
             import sys, os
             sys.path.insert(0, os.path.join(r'${{github.workspace}}', r'nsis'))
