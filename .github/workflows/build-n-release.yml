@@ -39,7 +39,7 @@ jobs:
 
       - name: Brew Dependencies
         if: startsWith(matrix.os, 'macos')
-        run: brew install scons mingw-w64
+        run: brew install scons mingw-w64 automake
 
       - name: Apt Dependencies
         if: startsWith(matrix.os, 'ubuntu')
