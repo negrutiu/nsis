@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest] # [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12, macos-13, windows-latest]  # TODO fails to find cppunit macos-14
+        os: [ubuntu-latest, macos-latest, windows-latest]
         arch: [x86, amd64]
         compiler: [gcc]
         include:
