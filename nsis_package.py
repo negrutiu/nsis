@@ -37,8 +37,8 @@ def build_nsis_package(artifacts, output):
 
             outdir = None
             for srcre, dstdir in [
-                [r'^.*-x86_windows-latest$', windows_x86_dir], [r'^.*-amd64_windows-latest$', windows_amd64_dir],
-                [r'^.*-x86_ubuntu-latest$', ubuntu_x86_dir],   [r'^.*-amd64_ubuntu-latest$', ubuntu_amd64_dir]]:
+                [r'^.*-x86_windows-latest_gcc$', windows_x86_dir], [r'^.*-amd64_windows-latest_gcc$', windows_amd64_dir],
+                [r'^.*-x86_ubuntu-latest_gcc$', ubuntu_x86_dir],   [r'^.*-amd64_ubuntu-latest_gcc$', ubuntu_amd64_dir]]:
                 if (re.match(srcre, dir)):
                     outdir = dstdir
             if outdir == None:
@@ -58,18 +58,6 @@ def build_nsis_package(artifacts, output):
 
     if count < 4:
         raise Exception(f"found {count}/4 distribution directories")
-
-    # # remove files
-    # for dir, filere in [
-    #     # remove ELF files
-    #     [ubuntu_x86_dir, r'^makensis$'],   [ubuntu_x86_dir, r'^GenPat$'],
-    #     [ubuntu_amd64_dir, r'^makensis$'], [ubuntu_amd64_dir, r'^GenPat$'],
-    #     ]:
-    #     for file in listdir(dir):
-    #         filepath = path.join(dir, file)
-    #         if re.match(filere, file) != None and path.isfile(filepath):
-    #             print(f"remove( {filepath} )")
-    #             os.remove(filepath)
 
     # copy files
     for srcdir, srcre, dstdir in [
