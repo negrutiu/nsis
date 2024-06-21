@@ -14,9 +14,14 @@ def posix_path(path):
     return path
 
 def setup_mingw_environ(arch):
-    """ Add `mingw` location to `PATH`. """
+    """
+    Add `mingw` location to `PATH`.
+    Returns:
+      Dictionary containing `msysdir`, `mingwdir`.
+    """
     if os.name != 'nt':
         return None
+
     if arch == 'x86': bitness = '32'
     if arch == 'amd64': bitness = '64'
 
@@ -38,7 +43,7 @@ def setup_mingw_environ(arch):
     print(f"-- mingwdir = {mingwdir}")
     os.environ["PATH"] = path.join(mingwdir, 'bin') + os.pathsep + os.environ["PATH"]     # i.e. r"C:\msys64\mingw32\bin", r"C:\mingw32\bin"
 
-    return mingwdir
+    return {'msysdir': msysdir, 'mingwdir': mingwdir}
 
 def setup_msvc_environ(arch):
     """
@@ -48,6 +53,7 @@ def setup_msvc_environ(arch):
     """
     if os.name != 'nt':
         return None
+
     if path.exists(vswhere := f"{os.environ.get('PROGRAMFILES(X86)', '*')}\\Microsoft Visual Studio\\Installer\\vswhere.exe"): pass
     elif path.exists(vswhere := f"{os.environ.get('PROGRAMFILES', '*')}\\Microsoft Visual Studio\\Installer\\vswhere.exe"): pass
     else: raise Exception('vswhere.exe not found')
@@ -78,28 +84,22 @@ def setup_msvc_environ(arch):
     return {'installationPath': instPath, 'platformToolset': toolset, 'archName': vsarch}
 
 def setup_environ(compiler, arch):
-    if compiler == 'mingw':
-        compiler = 'gcc'
-    if compiler != 'gcc' and compiler != 'msvc':
-        raise Exception(f"unknown compiler {compiler}")
-    if compiler == 'msvc' and os.name != 'nt':
-        raise Exception(f"{compiler} not available on {os.name}")
+    if compiler == 'mingw': compiler = 'gcc'
+    if compiler != 'gcc' and compiler != 'msvc': raise Exception(f"unknown compiler {compiler}")
+    if compiler == 'msvc' and os.name != 'nt': raise Exception(f"{compiler} not available on {os.name}")
 
-    if arch == "Win32":
-        arch = 'x86'
-    if arch == 'x64':
-        arch = 'amd64'
-    if arch != 'x86' and arch != 'amd64':
-        raise Exception(f"unknown arch {arch}")
+    if arch == "Win32": arch = 'x86'
+    if arch == 'x64': arch = 'amd64'
+    if arch != 'x86' and arch != 'amd64': raise Exception(f"unknown arch {arch}")
 
     if compiler == 'gcc':
         setup_mingw_environ(arch)
     elif compiler == 'msvc':
         setup_msvc_environ(arch)
+
     return [compiler, arch]
 
 def git_checkout(url, dir, depth = 1):
-    print('====================================================================================')
     curdir = path.curdir
     if path.exists(path.join(dir, '.git')):
         os.chdir(dir)
@@ -118,7 +118,6 @@ def git_checkout(url, dir, depth = 1):
         raise OSError(exitcode, f"failed to pull zlib")    
 
 def build_zlib(compiler, arch, zlibdir):
-    print('====================================================================================')
     compiler, arch = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(zlibdir)
@@ -139,7 +138,6 @@ def build_zlib(compiler, arch, zlibdir):
         raise OSError(exitcode, f"failed to build zlib")    
 
 def build_cppunit(compiler, arch, cppunitdir):
-    print('====================================================================================')
     if path.exists(path.join(cppunitdir, 'output', 'bin', 'DllPlugInTester.exe')):
         print("cppunit already built.")
         return
@@ -168,7 +166,6 @@ def build_cppunit(compiler, arch, cppunitdir):
         raise OSError(exitcode, f"failed to build cppunit")
 
 def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions = ['test', 'dist']):
-    print('====================================================================================')
     compiler, arch = setup_environ(compiler, arch)
     if os.name == 'nt':
         if path.exists(path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
@@ -216,18 +213,25 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--tests", type=bool, default=True, help='Build and run NSIS unit tests')
     args = parser.parse_args()
 
+    separator = ''
+
     workdir = path.dirname(__file__)
     os.makedirs(workdir, exist_ok=True)
     print(f"workdir = {workdir}")
 
     zlibdir = path.join(workdir, '.depend', 'zlib')
+    print(separator)
     git_checkout('https://github.com/madler/zlib.git', zlibdir)
+    print(separator)
     build_zlib(args.compiler, args.arch, zlibdir)
 
     if args.tests:
         cppunitdir = path.join(workdir, '.depend', 'cppunit')
+        print(separator)
         git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
+        print(separator)
         build_cppunit(args.compiler, args.arch, cppunitdir)
 
+    print(separator)
     actions = ['test', 'dist'] if args.tests else ['dist']
     build_nsis_distro(args.compiler, args.arch, args.build_number, zlibdir, cppunitdir, args.nsis_log, args.nsis_max_strlen, actions)
