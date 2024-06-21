@@ -44,6 +44,7 @@ def setup_mingw_environ(arch):
             msysdir = path.join(os.environ['SystemDrive'] + path.sep, subdir)
             break
     if not msysdir: raise Exception('msys2 not found')
+    print(f"-- msysdir = {msysdir}")
     os.environ["PATH"] = path.join(msysdir, 'usr', 'bin') + os.pathsep + os.environ["PATH"]   # i.e r"C:\msys64\usr\bin"
 
     mingwdir = None
@@ -52,6 +53,7 @@ def setup_mingw_environ(arch):
             mingwdir = path.join(os.environ['SystemDrive'] + path.sep, subdir)
             break
     if not mingwdir: raise Exception(f"mingw{bitness} not found")
+    print(f"-- mingwdir = {mingwdir}")
     os.environ["PATH"] = path.join(mingwdir, 'bin') + os.pathsep + os.environ["PATH"]     # i.e. r"C:\msys64\mingw32\bin", r"C:\mingw32\bin"
 
     return mingwdir
@@ -76,6 +78,7 @@ def setup_msvc_environ(arch):
 
     # VC install path
     instPath = jout[0]['installationPath']
+    print(f"-- installationPath = {instPath}")
     os.environ["PATH"] = path.join(instPath, 'VC', 'Auxiliary', 'Build') + os.pathsep + os.environ["PATH"]
 
     # guess the platform toolset version
@@ -83,6 +86,7 @@ def setup_msvc_environ(arch):
     if jout[0]['catalog']['productLineVersion'] == '2022': toolset = 'v143'
     if jout[0]['catalog']['productLineVersion'] == '2019': toolset = 'v142'
     if jout[0]['catalog']['productLineVersion'] == '2017': toolset = 'v141'
+    print(f"-- platformToolset = {toolset}")
 
     # arch
     vsarch = arch
@@ -170,7 +174,7 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir, nsislog=True
     print('====================================================================================')
     compiler = validate_compiler(compiler)
     arch = validate_arch(arch)
-    if os.name == 'nt' and compiler == 'mingw':
+    if os.name == 'nt' and compiler == 'gcc':
         setup_mingw_environ(arch)
     if os.name == 'nt':
         if path.exists(path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
