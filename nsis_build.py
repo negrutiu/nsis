@@ -124,10 +124,10 @@ def build_zlib(compiler, arch, zlibdir):
     os.chdir(zlibdir)
     if compiler == 'gcc':
         if os.name == 'nt':
-            args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-static', 'zlib1.dll']
+            args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
         else:
             prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
-            args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC="-D_WIN32_WINNT=0x0400', '-static', 'zlib1.dll']
+            args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC="-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
         print(f"-- {args}")
         exitcode = Popen(args).wait()
     elif compiler == 'msvc':
