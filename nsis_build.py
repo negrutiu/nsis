@@ -4,8 +4,8 @@ from subprocess import Popen, PIPE
 from nsis_version import *
 
 # requirements:
-# pacman -S mingw-w64-i686-cppunit
-# pacman -S mingw-w64-x86_64-cppunit
+# pacman -S mingw-w64-i686-toolchain
+# pacman -S mingw-w64-x86_64-toolchain
 # pacman -S libtool autoconf-wrapper automake-wrapper     (cppunit)
 
 def validate_compiler(compiler):

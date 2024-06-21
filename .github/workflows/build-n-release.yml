@@ -59,6 +59,18 @@ jobs:
           #choco install html-help-workshop 
           echo "${Env:ProgramFiles(x86)}\HTML Help Workshop" >> $Env:GITHUB_PATH
 
+      - name: Upgrade msys2/mingw64
+        if: startsWith(matrix.os, 'windows')
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+          release: false
+          update: true
+          install: >-
+            libtool
+            autoconf-wrapper
+            automake-wrapper
+  
       # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
       - name: Checkout
         uses: actions/checkout@v4
