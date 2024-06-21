@@ -92,7 +92,6 @@ def setup_msvc_environ(arch):
 
 def setup_environ(compiler, arch):
     """ Validate `compiler` and `arch` and set up the environment for them. """
-    print(f"-- os.name = {os.name}")
     if compiler == 'mingw': compiler = 'gcc'
     if compiler != 'gcc' and compiler != 'msvc': raise Exception(f"unknown compiler {compiler}")
     if compiler == 'msvc' and os.name != 'nt': raise Exception(f"{compiler} not available on {os.name}")
