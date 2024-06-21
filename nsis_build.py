@@ -147,7 +147,7 @@ def build_zlib(compiler, arch, zlibdir):
     if exitcode != 0:
         raise OSError(exitcode, f"failed to build zlib")    
 
-def build_cppunit(compiler, arch, cppunitdir):
+def build_cppunit(compiler, arch, cppunitdir, CC=None):
     if path.exists(path.join(cppunitdir, 'output', 'bin', 'DllPlugInTester.exe')):
         print("cppunit already built.")
         return
@@ -160,7 +160,7 @@ def build_cppunit(compiler, arch, cppunitdir):
             prefix = 'mingw32-'
         for args in [
             ['sh', './autogen.sh'],
-            ['sh', './configure', 'LDFLAGS=-static', 'MAKE=gmake', rf'--prefix={posix_path(path.join(cppunitdir, "output"))}', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
+            ['sh', './configure', 'LDFLAGS=-static', 'MAKE=gmake', rf'--prefix={posix_path(path.join(cppunitdir, "output"))}', rf'CC={CC}' if CC else '', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
             [f'{prefix}make'],
             [f'{prefix}make', 'install'],
         ]:

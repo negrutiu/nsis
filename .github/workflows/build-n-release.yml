@@ -121,6 +121,12 @@ jobs:
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
           build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
 
+      - name: CppUnit Debug
+        run: |
+            gcc --version
+            gcc-13 --version
+            exit(0)
+
       - name: CppUnit Checkout & Build
         shell: python
         working-directory: nsis
@@ -131,13 +137,8 @@ jobs:
             # ----- nsis_build.py -----
             cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
             git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
-            build_cppunit(r'${{matrix.compiler}}', r'${{matrix.arch}}', cppunitdir)
-
-      - name: CppUnit Debug
-        shell: pwsh
-        run: |
-          Get-ChildItem -Path '${{github.workspace}}/cppunit/output' -Recurse -File | %{$_.FullName}
-          pip list
+            cc = 'gcc-13' if '${{matrix.os}}'.find('macos') == 0 else None
+            build_cppunit(r'${{matrix.compiler}}', r'${{matrix.arch}}', cppunitdir, CC=cc)
 
       - name: Build NSIS
         working-directory: nsis
