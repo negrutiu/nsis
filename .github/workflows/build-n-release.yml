@@ -199,6 +199,10 @@ jobs:
         # this step merges all artifacts into '.instdist-ubuntu-x86' and '.instdist-ubuntu-amd64' directories
         build_nsis_package(os.path.join(r'${{github.workspace}}', 'artifacts'), r'${{github.workspace}}')
 
+    - name: Debug
+      run: |
+        find .instdist-ubuntu-x86 -ls
+
     - name: Build NSIS Setup
       shell: python
       run: |
