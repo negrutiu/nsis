@@ -131,18 +131,15 @@ def build_zlib(compiler, arch, zlibdir):
     compiler, arch, vars = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(zlibdir)
-    if compiler == 'gcc':
-        if os.name == 'nt':
-            args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
-        else:
-            prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
-            args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
-        print(f"-- {args}")
-        exitcode = Popen(args).wait()
+    if compiler == 'gcc' and os.name == 'nt':
+        args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
+    elif compiler == 'gcc' and os.name != 'nt':
+        prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
+        args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
     elif compiler == 'msvc':
         args = [f'cmd.exe', '/c', 'call', "vcvarsall.bat", arch, '&&', 'nmake.exe', '-f', 'win32/Makefile.msc', f'LOC=/MT', 'zlib1.dll', 'zdll.lib']
-        print(f"-- {args}")
-        exitcode = Popen(args).wait()
+    print(f"-- {args}")
+    exitcode = Popen(args).wait()
     os.chdir(curdir)
     if exitcode != 0:
         raise OSError(exitcode, f"failed to build zlib")    
