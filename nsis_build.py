@@ -153,7 +153,7 @@ def build_cppunit(compiler, arch, cppunitdir):
     os.chdir(cppunitdir)
     if compiler == 'gcc':
         prefix = 'mingw32-' if os.name == 'nt' else ""
-        outargs = [rf'--prefix={win_to_posix(path.join(cppunitdir, 'installed'))}', rf'--libdir={win_to_posix(path.join(cppunitdir, 'lib'))}', rf'--bindir={win_to_posix(path.join(cppunitdir, 'bin'))}']
+        outargs = [rf"--prefix={win_to_posix(path.join(cppunitdir, 'installed'))}", rf'--libdir={win_to_posix(path.join(cppunitdir, "lib"))}', rf"--bindir={win_to_posix(path.join(cppunitdir, 'bin'))}"]
         for args in [
             ['sh', './autogen.sh'],
             ['sh', './configure', f'MAKE={prefix}make'] + outargs + ['LDFLAGS=-static', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
@@ -206,7 +206,7 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
 
     exitcode = Popen(args).wait()
     if exitcode != 0:
-        raise OSError(exitcode, f"failed to build nsis")    
+        raise OSError(exitcode, f"failed to build nsis")
 
 if __name__ == '__main__':
     import argparse
