@@ -30,15 +30,15 @@ def build_nsis_package(artifacts, output):
                 with zipfile.ZipFile(zippath) as zip:
                     zip.extractall(unzipdir)
 
-    # extract the root directory from the inner .zip file (i.e. dist-x86_ubuntu-latest.zip => nsis-0.0.0.0-x86.zip => .\nsis-0.0.0.0 )
+    # extract the root directory from the inner .zip file (i.e. artifacts-ubuntu-latest-x86-gcc.zip => nsis-0.0.0.0-x86.zip => .\nsis-0.0.0.0 )
     count = 0
     for dir in listdir(artifacts):
         if path.isdir(path.join(artifacts, dir)):
 
             outdir = None
             for srcre, dstdir in [
-                [r'^.*-x86_windows-latest_gcc$', windows_x86_dir], [r'^.*-amd64_windows-latest_gcc$', windows_amd64_dir],
-                [r'^.*-x86_ubuntu-latest_gcc$', ubuntu_x86_dir],   [r'^.*-amd64_ubuntu-latest_gcc$', ubuntu_amd64_dir]]:
+                [r'^.*-windows-latest-x86-gcc$', windows_x86_dir], [r'^.*-windows-latest-amd64-gcc$', windows_amd64_dir],
+                [r'^.*-ubuntu-latest-x86-gcc$', ubuntu_x86_dir],   [r'^.*-ubuntu-latest-amd64-gcc$', ubuntu_amd64_dir]]:
                 if (re.match(srcre, dir)):
                     outdir = dstdir
             if outdir == None:
