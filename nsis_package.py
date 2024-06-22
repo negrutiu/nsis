@@ -4,7 +4,7 @@ import re
 import zipfile
 import shutil
 
-def build_nsis_package(artifacts, output):
+def build_nsis_package(artifacts, output=None):
     """Merge together x86 and amd64 build packages to form the final NSIS package.
 
     NSIS packages (x86 and amd64) are built from the `ubuntu` packages, with
@@ -14,6 +14,12 @@ def build_nsis_package(artifacts, output):
     artifacts: Input directory with build artifacts
     output: Output directory where final packages are put
     """
+    artifacts = path.abspath(artifacts)
+    if not output: output = artifacts
+    output = path.abspath(output)
+    # print(f"-- artifacts_dir = {artifacts}")
+    # print(f"-- output_dir = {output}")
+
     windows_x86_dir   = path.join(output, '.instdist-windows-x86')
     windows_amd64_dir = path.join(output, '.instdist-windows-amd64')
     ubuntu_x86_dir    = path.join(output, '.instdist-ubuntu-x86')
