@@ -127,6 +127,8 @@ jobs:
             echo ------------------------------------------------------------
             ls -la /usr/bin/x86_64* || echo "no /usr/bin/x86_64* files"
             echo ------------------------------------------------------------
+            ls -la /usr/bin/*-13* || echo "no /usr/bin/*-13* files"
+            echo ------------------------------------------------------------
             ls -la /opt/homebrew/bin/i686* || echo "no /opt/homebrew/bin/i686* files"
             echo ------------------------------------------------------------
             ls -la /opt/homebrew/bin/x86_64* || echo "no /opt/homebrew/bin/x86_64* files"
