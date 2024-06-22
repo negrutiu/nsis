@@ -127,7 +127,7 @@ def git_checkout(url, dir, depth = 1):
     if exitcode != 0:
         raise OSError(exitcode, f"failed to pull zlib")    
 
-def build_zlib(compiler, arch, zlibdir):
+def build_zlib(compiler, arch, zlibdir, PREFIX=None):
     compiler, arch, vars = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(zlibdir)
@@ -135,8 +135,10 @@ def build_zlib(compiler, arch, zlibdir):
         if os.name == 'nt':
             args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
         else:
-            prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
-            args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
+            if not PREFIX:
+                prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
+                PREFIX = prefixes[arch]
+            args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={PREFIX}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
         print(f"-- {args}")
         exitcode = Popen(args).wait()
     elif compiler == 'msvc':
