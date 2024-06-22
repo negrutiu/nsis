@@ -8,7 +8,7 @@ from nsis_version import *
 # pacman -S mingw-w64-x86_64-toolchain
 # pacman -S libtool autoconf-wrapper automake-wrapper     (cppunit)
 
-def posix_path(path):
+def win_to_posix(path):
     if path[1] == ':':
         return '/' + path.replace(':', '').replace('\\', '/')
     return path
@@ -144,24 +144,22 @@ def build_zlib(compiler, arch, zlibdir):
     if exitcode != 0:
         raise OSError(exitcode, f"failed to build zlib")    
 
-def build_cppunit(compiler, arch, cppunitdir, CC=None):
-    if path.exists(path.join(cppunitdir, 'output', 'bin', 'DllPlugInTester.exe')):
+def build_cppunit(compiler, arch, cppunitdir):
+    if path.exists(path.join(cppunitdir, 'bin', 'DllPlugInTester.exe')) or path.exists(path.join(cppunitdir, 'lib', 'DllPlugInTester_dll.exe')):
         print("cppunit already built.")
         return
     compiler, arch, vars = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(cppunitdir)
     if compiler == 'gcc':
-        prefix = ''
-        if os.name == 'nt':
-            prefix = 'mingw32-'
+        prefix = 'mingw32-' if os.name == 'nt' else ""
         for args in [
             ['sh', './autogen.sh'],
-            ['sh', './configure', 'LDFLAGS=-static', 'MAKE=gmake', rf'--prefix={posix_path(path.join(cppunitdir, "output"))}', rf'CC={CC}' if CC else '', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
+            ['sh', './configure', f'MAKE={prefix}make', 'LDFLAGS=-static', rf'--prefix={win_to_posix(cppunitdir)}', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
             [f'{prefix}make'],
-            [f'{prefix}make', 'install'],
-        ]:
-            print(f"--- {args}")
+            [f'{prefix}make', 'install']
+            ]:
+            print(f"-- {args}")
             exitcode = Popen(args).wait()
             if exitcode != 0: raise OSError(exitcode, f"failed to build cppunit")
     elif compiler == 'msvc':
@@ -200,11 +198,8 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
         if os.name == 'nt':
             args += ['TOOLSET=gcc,gnulink,mingw']   # building in Windows using mingw
         args += ['APPEND_LINKFLAGS=-static']
-    if 'test' in actions and cppunitdir:
-        if compiler == 'gcc':
-            args += [f'APPEND_CPPPATH={path.join(cppunitdir, "output", "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "output", "lib")}']
-        elif compiler == 'msvc':
-            args += [f'APPEND_CPPPATH={path.join(cppunitdir, "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}']
+    if cppunitdir and 'test' in actions:
+        args += [f'APPEND_CPPPATH={path.join(cppunitdir, "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}']
     args += actions
     print(f"-- {args}")
 
