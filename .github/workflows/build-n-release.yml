@@ -123,15 +123,18 @@ jobs:
       - name: Debug
         if: startsWith(matrix.os, 'macos')
         run: |
-            ls -la /usr/bin/i686*
+            ls -la /usr/bin/i686* || echo "no files"
             echo ------------------------------------------------------------
-            ls -la /usr/bin/x86_64*
+            ls -la /usr/bin/x86_64* || echo "no files"
             echo ------------------------------------------------------------
             gcc --version
             echo ------------------------------------------------------------
             gcc-13 --version
             echo ------------------------------------------------------------
             g++-13 --version
+            echo ------------------------------------------------------------
+            which gcc || echo "not found"
+            which gcc-13 || echo "not found"
 
       # build cppunit on non-macos runners
       # macos fails to build it, so we stick with the homebrew cppunit
