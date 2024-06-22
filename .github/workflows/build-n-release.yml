@@ -129,6 +129,7 @@ jobs:
             echo ------------------------------------------------------------
             ls -la /usr/bin/*-13 || echo "no /usr/bin/*-13 files"
             ls -la /usr/local/bin/*-13 || echo "no /usr/local/bin/*-13 files"
+            ls -la /usr/local/Cellar/gcc@13/13.3.0/bin/* || echo "/usr/local/Cellar/gcc@13/13.3.0/bin/* files"
             echo ------------------------------------------------------------
             ls -la /opt/homebrew/bin/i686* || echo "no /opt/homebrew/bin/i686* files"
             echo ------------------------------------------------------------
