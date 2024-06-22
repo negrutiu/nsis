@@ -131,12 +131,7 @@ jobs:
             echo ------------------------------------------------------------
             ls -la /opt/homebrew/bin/x86_64* || echo "no /opt/homebrew/bin/x86_64* files"
             echo ------------------------------------------------------------
-            gcc --version
-            echo ------------------------------------------------------------
-            gcc-13 --version
-            echo ------------------------------------------------------------
-            g++-13 --version
-            for compiler in cc c++ gcc g++ clang clang++
+            for compiler in cc c++ gcc g++ gcc-13 g++-13 clang clang++
             do
               echo -- $compiler --------------------------------------------------------
               which $compiler
