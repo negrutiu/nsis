@@ -211,7 +211,7 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
 def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
     args = [
         'makensis',
-        f'/DOUTFILE={outfile if outfile else path.join(nsisdir, f'nsis-{nsis_version(buildno)}-negrutiu-{arch}.exe')}',
+        f'/DOUTFILE={outfile if outfile else path.join(nsisdir, f"nsis-{nsis_version(buildno)}-negrutiu-{arch}.exe")}',
         f'/DVERSION={nsis_version(buildno)}',
         f'/DVER_MAJOR={nsis_major_version()}',
         f'/DVER_MINOR={nsis_minor_version()}',
