@@ -229,8 +229,6 @@ def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
         raise OSError(exitcode, 'failed to build the installer')
 
 if __name__ == '__main__':
-    build_nsis_installer(path.join(path.dirname(__file__), '.instdist-ubuntu-amd64'), 'amd64', 0)
-    exit(0)
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument_group('build')
