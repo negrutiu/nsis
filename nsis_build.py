@@ -175,7 +175,7 @@ def build_cppunit(compiler, arch, cppunitdir, CC=None):
     if exitcode != 0:
         raise OSError(exitcode, f"failed to build cppunit")
 
-def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, actions = ['test', 'dist']):
+def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, extra=[], actions=['test', 'dist']):
     """
     Build a NSIS distribution package. \n
     `zlib` and `cppunit` must be built as well.
@@ -208,6 +208,7 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
             args += [f'APPEND_CPPPATH={path.join(cppunitdir, "output", "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "output", "lib")}']
         elif compiler == 'msvc':
             args += [f'APPEND_CPPPATH={path.join(cppunitdir, "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}']
+    args += extra
     args += actions
     print(f"-- {args}")
 
