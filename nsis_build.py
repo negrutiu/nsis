@@ -209,8 +209,12 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
         raise OSError(exitcode, f"failed to build nsis")
 
 def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
+    makensis = path.join(nsisdir, 'makensis.exe' if os.name == 'nt' else 'makensis'),      # 'makensis' on posix, 'makensis.exe' on windows
+    if os.name == 'posix':
+        mode = stat.S_IMODE(os.lstat(makensis).st_mode)
+        os.chmod(makensis, mode | stat.S_IXUSR)     # `chmod u+x makensis`
     args = [
-        path.join(nsisdir, 'makensis.exe' if os.name == 'nt' else 'makensis'),      # 'makensis' on posix, 'makensis.exe' on windows
+        makensis,
         f'/DOUTFILE={outfile if outfile else path.join(nsisdir, f"nsis-{nsis_version(buildno)}-negrutiu-{arch}.exe")}',
         f'/DVERSION={nsis_version(buildno)}',
         f'/DVER_MAJOR={nsis_major_version()}',
