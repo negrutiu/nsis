@@ -118,6 +118,7 @@ jobs:
           # ----- nsis_build.py -----
           zlibdir = os.path.join(r'${{github.workspace}}', 'zlib')
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
+          PREFIX = None
           if r'${{matrix.os}}'.startswith('macos'):
             if   r'${{matrix.arch}}' == 'x86':   PREFIX = '/opt/homebrew/bin/i686-w64-mingw32-'
             elif r'${{matrix.arch}}' == 'amd64': PREFIX = '/opt/homebrew/bin/x86_64-w64-mingw32-'
