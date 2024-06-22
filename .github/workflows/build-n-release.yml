@@ -123,9 +123,13 @@ jobs:
       - name: Debug
         if: startsWith(matrix.os, 'macos')
         run: |
-            ls -la /usr/bin/i686* || echo "no files"
+            ls -la /usr/bin/i686* || echo "no /usr/bin/i686* files"
             echo ------------------------------------------------------------
-            ls -la /usr/bin/x86_64* || echo "no files"
+            ls -la /usr/bin/x86_64* || echo "no /usr/bin/x86_64* files"
+            echo ------------------------------------------------------------
+            ls -la /opt/homebrew/bin/i686* || echo "no /opt/homebrew/bin/i686* files"
+            echo ------------------------------------------------------------
+            ls -la /opt/homebrew/bin/x86_64* || echo "no /opt/homebrew/bin/x86_64* files"
             echo ------------------------------------------------------------
             gcc --version
             echo ------------------------------------------------------------
