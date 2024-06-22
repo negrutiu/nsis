@@ -209,6 +209,9 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
         raise OSError(exitcode, f"failed to build nsis")
 
 def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
+    # change directory to nsisdir. make sure we call the local `makensis` instead of the one in Program Files
+    curdir = os.curdir
+    os.chdir(nsisdir)
     args = [
         'makensis',
         f'/DOUTFILE={outfile if outfile else path.join(nsisdir, f"nsis-{nsis_version(buildno)}-negrutiu-{arch}.exe")}',
@@ -227,8 +230,11 @@ def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
     print(f"-- args = {args}")
     if (exitcode := Popen(args).wait()) != 0:
         raise OSError(exitcode, 'failed to build the installer')
+    os.chdir(curdir)
 
 if __name__ == '__main__':
+    build_nsis_installer(path.join(path.dirname(__file__), '.instdist-ubuntu-amd64'), 'amd64', 0)
+    exit(0)
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument_group('build')
