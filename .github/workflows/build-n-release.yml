@@ -40,7 +40,7 @@ jobs:
       - name: Brew Dependencies
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install scons mingw-w64 cppunit
+          brew install scons mingw-w64 zlib cppunit
 
       - name: Apt Dependencies
         if: startsWith(matrix.os, 'ubuntu')
