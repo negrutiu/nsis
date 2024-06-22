@@ -120,7 +120,7 @@ jobs:
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
           build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
 
-      - name: Debug
+      - name: Debug MacOS
         if: startsWith(matrix.os, 'macos')
         run: |
             ls -la /usr/bin/i686* || echo "no /usr/bin/i686* files"
@@ -202,43 +202,19 @@ jobs:
         sys.path.insert(0, r'${{github.workspace}}')
         from nsis_package import *
         # ----- nsis_package.py -----
+        # this step merges all artifacts into '.instdist-ubuntu-x86' and '.instdist-ubuntu-amd64' directories
         build_nsis_package(os.path.join(r'${{github.workspace}}', 'artifacts'), r'${{github.workspace}}')
 
-    - name: Build NSIS Setup (x86)
-      shell: cmd
-      working-directory: .instdist-ubuntu-x86
+    - name: Build NSIS Setup
+      shell: python
       run: |
-        makensis ^
-          /DOUTFILE="../nsis-${{needs.build.outputs.version_full}}-negrutiu-x86.exe" ^
-          /DVERSION=${{needs.build.outputs.version_full}} ^
-          /DVER_MAJOR=${{needs.build.outputs.version_major}} ^
-          /DVER_MINOR=${{needs.build.outputs.version_minor}} ^
-          /DVER_REVISION=${{needs.build.outputs.version_revision}} ^
-          /DVER_BUILD=${{needs.build.outputs.version_build}} ^
-          /DLINK_INFO=https://github.com/negrutiu/nsis ^
-          /DVER_PRODUCTNAME="Unofficial NSIS fork by Marius Negrutiu" ^
-          /DVER_LEGALTRADEMARKS=https://github.com/negrutiu/nsis ^
-          /DEXTRA_WELCOME_TEXT="$\r$\n$\r$\n$\r$\n(*) This is an unofficial fork from https://github.com/negrutiu/nsis$\r$\n" ^
-          /V4 ^
-          Examples\makensis-fork.nsi
-
-    - name: Build NSIS Setup (amd64)
-      shell: cmd
-      working-directory: .instdist-ubuntu-amd64
-      run: |
-        makensis ^
-          /DOUTFILE="../nsis-${{needs.build.outputs.version_full}}-negrutiu-amd64.exe" ^
-          /DVERSION=${{needs.build.outputs.version_full}} ^
-          /DVER_MAJOR=${{needs.build.outputs.version_major}} ^
-          /DVER_MINOR=${{needs.build.outputs.version_minor}} ^
-          /DVER_REVISION=${{needs.build.outputs.version_revision}} ^
-          /DVER_BUILD=${{needs.build.outputs.version_build}} ^
-          /DLINK_INFO=https://github.com/negrutiu/nsis ^
-          /DVER_PRODUCTNAME="Unofficial NSIS fork by Marius Negrutiu" ^
-          /DVER_LEGALTRADEMARKS=https://github.com/negrutiu/nsis ^
-          /DEXTRA_WELCOME_TEXT="$\r$\n$\r$\n$\r$\n(*) This is an unofficial fork from https://github.com/negrutiu/nsis$\r$\n" ^
-          /V4 ^
-          Examples\makensis-fork.nsi
+        import sys, os
+        sys.path.insert(0, r'${{github.workspace}}')
+        from nsis_build import *
+        # ----- nsis_build.py -----
+        # this step builds the final installers
+        build_nsis_installer(os.path.join(r'${{github.workspace}}', '.instdist-ubuntu-x86'), 'x86', ${{github.run_number}})
+        build_nsis_installer(os.path.join(r'${{github.workspace}}', '.instdist-ubuntu-amd64'), 'amd64', ${{github.run_number}})
 
     - name: Upload NSIS Setup (x86)
       uses: actions/upload-artifact@v4

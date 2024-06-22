@@ -208,6 +208,26 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
     if exitcode != 0:
         raise OSError(exitcode, f"failed to build nsis")
 
+def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
+    args = [
+        'makensis',
+        f'/DOUTFILE={outfile if outfile else path.join(nsisdir, f'nsis-{nsis_version(buildno)}-negrutiu-{arch}.exe')}',
+        f'/DVERSION={nsis_version(buildno)}',
+        f'/DVER_MAJOR={nsis_major_version()}',
+        f'/DVER_MINOR={nsis_minor_version()}',
+        f'/DVER_REVISION={nsis_build_number(buildno)}',
+        f'/DVER_BUILD={nsis_version(buildno)}',
+        r'/DLINK_INFO=https://github.com/negrutiu/nsis',
+        r'/DVER_PRODUCTNAME=Unofficial NSIS fork by Marius Negrutiu',
+        r'/DVER_LEGALTRADEMARKS=https://github.com/negrutiu/nsis',
+        r'/DEXTRA_WELCOME_TEXT=$\r$\n$\r$\n$\r$\n(*) This is an unofficial fork from https://github.com/negrutiu/nsis$\r$\n',
+        r'/V4',
+        path.join(nsisdir, 'Examples', 'makensis-fork.nsi')
+    ]
+    print(f"-- args = {args}")
+    if (exitcode := Popen(args).wait()) != 0:
+        raise OSError(exitcode, 'failed to build the installer')
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
@@ -242,3 +262,5 @@ if __name__ == '__main__':
     print(separator)
     actions = ['test', 'dist'] if args.tests else ['dist']
     build_nsis_distro(args.compiler, args.arch, args.build_number, zlibdir, cppunitdir, args.nsis_log, args.nsis_max_strlen, actions)
+
+    build_nsis_installer(path.join(workdir, '.instdist'), args.arch, args.build_number)
