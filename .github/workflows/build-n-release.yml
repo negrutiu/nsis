@@ -120,11 +120,17 @@ jobs:
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
           build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
 
-      - name: CppUnit Debug
+      - name: Debug
         if: startsWith(matrix.os, 'macos')
         run: |
+            ls -la /usr/bin/i686*
+            echo ------------------------------------------------------------
+            ls -la /usr/bin/x86_64*
+            echo ------------------------------------------------------------
             gcc --version
+            echo ------------------------------------------------------------
             gcc-13 --version
+            echo ------------------------------------------------------------
             g++-13 --version
 
       # build cppunit on non-macos runners
@@ -168,9 +174,9 @@ jobs:
           name: dist-${{matrix.arch}}_${{matrix.os}}_${{matrix.compiler}}
           path: nsis/nsis-*.zip
 
-      - name: Config Errors
-        if: failure()
-        run: cat config.log
+      # - name: Config Errors
+      #   if: failure()
+      #   run: cat config.log
 
   package:
     name: Package
