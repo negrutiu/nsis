@@ -136,9 +136,12 @@ jobs:
             gcc-13 --version
             echo ------------------------------------------------------------
             g++-13 --version
-            echo ------------------------------------------------------------
-            which gcc || echo "not found"
-            which gcc-13 || echo "not found"
+            for compiler in cc c++ gcc g++ clang clang++
+            do
+              echo -- $compiler --------------------------------------------------------
+              which $compiler
+              $compiler --version
+            done
 
       # build cppunit on non-macos runners
       - name: CppUnit Checkout & Build
