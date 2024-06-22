@@ -40,7 +40,11 @@ jobs:
       - name: Brew Dependencies
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install scons mingw-w64 zlib cppunit
+          brew install scons mingw-w64 zlib
+          curl --retry 9 -sLo cppunit.rb "https://sourceforge.net/p/nsis/code/HEAD/tree/web-scripts/trunk/cppunit.rb?format=raw"
+          brew install -s --formula cppunit.rb
+          echo "cppunit installed in $(brew --prefix cppunit)"
+          find $(brew --prefix cppunit)/* -ls
 
       - name: Apt Dependencies
         if: startsWith(matrix.os, 'ubuntu')
