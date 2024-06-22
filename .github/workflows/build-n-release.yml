@@ -118,11 +118,7 @@ jobs:
           # ----- nsis_build.py -----
           zlibdir = os.path.join(r'${{github.workspace}}', 'zlib')
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
-          PREFIX = None
-          if r'${{matrix.os}}'.startswith('macos'):
-            if   r'${{matrix.arch}}' == 'x86':   PREFIX = '/opt/homebrew/bin/i686-w64-mingw32-'
-            elif r'${{matrix.arch}}' == 'amd64': PREFIX = '/opt/homebrew/bin/x86_64-w64-mingw32-'
-          build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir, PREFIX=PREFIX)
+          build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
 
       - name: Debug
         if: startsWith(matrix.os, 'macos')
@@ -171,13 +167,7 @@ jobs:
             cppunitdir = None
             if not r'${{matrix.os}}'.startswith('macos'):
               os.path.join(r'${{github.workspace}}', 'cppunit')   # use homebrew cppunit on macos
-            extra = []    # extra scons arguments
-            if r'${{matrix.os}}'.startswith('macos'):
-              if r'${{matrix.arch}}' == 'x86':
-                extra += ['CC=/opt/homebrew/bin/i686-w64-mingw32-gcc', 'CXX=/opt/homebrew/bin/i686-w64-mingw32-g++']
-              elif r'${{matrix.arch}}' == 'amd64':
-                extra += ['CC=/opt/homebrew/bin/x86_64-w64-mingw32-gcc', 'CXX=/opt/homebrew/bin/x86_64-w64-mingw32-g++']
-            build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, extra=extra, actions=['test', 'dist-zip'])
+            build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist-zip'])
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
