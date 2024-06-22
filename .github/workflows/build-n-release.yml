@@ -118,7 +118,10 @@ jobs:
           # ----- nsis_build.py -----
           zlibdir = os.path.join(r'${{github.workspace}}', 'zlib')
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
-          build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
+          if r'${{matrix.os}}'.startswith('macos'):
+            if   r'${{matrix.arch}}' == 'x86':   PREFIX = '/opt/homebrew/bin/i686-w64-mingw32-'
+            elif r'${{matrix.arch}}' == 'amd64': PREFIX = '/opt/homebrew/bin/x86_64-w64-mingw32-'
+          build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir, PREFIX=PREFIX)
 
       - name: Debug
         if: startsWith(matrix.os, 'macos')
@@ -153,13 +156,7 @@ jobs:
             # ----- nsis_build.py -----
             cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
             git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
-            PREFIX = None
-            if r'${{matrix.os}}'.startswith('macos'):
-              if r'${{matrix.arch}}' == 'x86':
-                PREFIX = '/opt/homebrew/bin/i686-w64-mingw32-'
-              elif r'${{matrix.arch}}' == 'amd64':
-                PREFIX = '/opt/homebrew/bin/x86_64-w64-mingw32-'
-            build_cppunit(r'${{matrix.compiler}}', r'${{matrix.arch}}', cppunitdir, PREFIX=PREFIX)
+            build_cppunit(r'${{matrix.compiler}}', r'${{matrix.arch}}', cppunitdir)
 
       - name: Build NSIS
         working-directory: nsis
