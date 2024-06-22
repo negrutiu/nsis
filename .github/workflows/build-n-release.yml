@@ -40,8 +40,7 @@ jobs:
       - name: Brew Dependencies
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install gcc scons mingw-w64 automake libtool
-          brew update && brew outdated && brew upgrade && brew cleanup
+          brew install scons mingw-w64 cppunit
 
       - name: Apt Dependencies
         if: startsWith(matrix.os, 'ubuntu')
@@ -128,7 +127,10 @@ jobs:
             gcc-13 --version
             g++-13 --version
 
+      # build cppunit on non-macos runners
+      # macos fails to build it, so we stick with the homebrew cppunit
       - name: CppUnit Checkout & Build
+        if: "!startsWith(matrix.os, 'macos')"
         shell: python
         working-directory: nsis
         run: |
@@ -149,7 +151,9 @@ jobs:
             from nsis_build import *
             # ----- nsis_build.py -----
             zlibdir = os.path.join(r'${{github.workspace}}', 'zlib')
-            cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
+            cppunitdir = None
+            if r'${{matrix.os}}'.find('macos') == -1:
+              os.path.join(r'${{github.workspace}}', 'cppunit')   # use homebrew cppunit
             build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist-zip'])
 
       - name: Upload Artifacts
