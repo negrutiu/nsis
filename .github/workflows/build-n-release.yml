@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         arch: [x86, amd64]
         compiler: [gcc]
         include:
@@ -40,11 +40,7 @@ jobs:
       - name: Brew Dependencies
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install scons mingw-w64 zlib
-          curl --retry 9 -sLo cppunit.rb "https://sourceforge.net/p/nsis/code/HEAD/tree/web-scripts/trunk/cppunit.rb?format=raw"
-          brew install -s --formula cppunit.rb
-          echo "cppunit installed in $(brew --prefix cppunit)"
-          find $(brew --prefix cppunit)/* -ls
+          brew install gcc scons mingw-w64 zlib
 
       - name: Apt Dependencies
         if: startsWith(matrix.os, 'ubuntu')
@@ -145,7 +141,6 @@ jobs:
             which gcc-13 || echo "not found"
 
       # build cppunit on non-macos runners
-      # macos fails to build it, so we stick with the homebrew cppunit
       - name: CppUnit Checkout & Build
         if: "!startsWith(matrix.os, 'macos')"
         shell: python
@@ -168,10 +163,12 @@ jobs:
             from nsis_build import *
             # ----- nsis_build.py -----
             zlibdir = os.path.join(r'${{github.workspace}}', 'zlib')
-            cppunitdir = None
-            if not r'${{matrix.os}}'.startswith('macos'):
-              os.path.join(r'${{github.workspace}}', 'cppunit')   # use homebrew cppunit on macos
-            build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist-zip'])
+            cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
+            actions = ['test', 'dist-zip']
+            if r'${{matrix.os}}'.startswith('macos'):
+              cppunitdir = None
+              actions = ['dist-zip']
+            build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions=actions)
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -179,9 +176,6 @@ jobs:
           name: dist-${{matrix.arch}}_${{matrix.os}}_${{matrix.compiler}}
           path: nsis/nsis-*.zip
 
-      # - name: Config Errors
-      #   if: failure()
-      #   run: cat config.log
 
   package:
     name: Package

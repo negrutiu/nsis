@@ -127,7 +127,7 @@ def git_checkout(url, dir, depth = 1):
     if exitcode != 0:
         raise OSError(exitcode, f"failed to pull zlib")    
 
-def build_zlib(compiler, arch, zlibdir, PREFIX=None):
+def build_zlib(compiler, arch, zlibdir):
     compiler, arch, vars = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(zlibdir)
@@ -135,10 +135,8 @@ def build_zlib(compiler, arch, zlibdir, PREFIX=None):
         if os.name == 'nt':
             args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
         else:
-            if not PREFIX:
-                prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
-                PREFIX = prefixes[arch]
-            args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={PREFIX}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
+            prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
+            args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
         print(f"-- {args}")
         exitcode = Popen(args).wait()
     elif compiler == 'msvc':
@@ -177,7 +175,7 @@ def build_cppunit(compiler, arch, cppunitdir, CC=None):
     if exitcode != 0:
         raise OSError(exitcode, f"failed to build cppunit")
 
-def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, extra=[], actions=['test', 'dist']):
+def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist']):
     """
     Build a NSIS distribution package. \n
     `zlib` and `cppunit` must be built as well.
@@ -210,7 +208,6 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
             args += [f'APPEND_CPPPATH={path.join(cppunitdir, "output", "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "output", "lib")}']
         elif compiler == 'msvc':
             args += [f'APPEND_CPPPATH={path.join(cppunitdir, "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}']
-    args += extra
     args += actions
     print(f"-- {args}")
 
