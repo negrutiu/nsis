@@ -3,6 +3,7 @@ import os
 import re
 import zipfile
 import shutil
+import stat
 from subprocess import Popen
 from nsis_version import *
 

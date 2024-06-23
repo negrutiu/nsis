@@ -1,5 +1,5 @@
 from os import path
-import os, sys, shutil, json, stat
+import os, sys, shutil, json
 from subprocess import Popen, PIPE
 from nsis_version import *
 
