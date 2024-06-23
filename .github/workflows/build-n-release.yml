@@ -89,8 +89,8 @@ jobs:
           sys.path.insert(0, os.path.join(r'${{github.workspace}}', r'nsis'))
           from nsis_version import *
 
-          version_full = nsis_version(${{github.run_number}})
-          version_packed = nsis_packed_version(${{github.run_number}})
+          version_full = nsis_version(build_number=${{github.run_number}})
+          version_packed = nsis_packed_version(build_number=${{github.run_number}})
           version_major = nsis_major_version()
           version_minor = nsis_minor_version()
           version_revision = nsis_revision_number()
@@ -184,8 +184,6 @@ jobs:
     # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
@@ -203,15 +201,23 @@ jobs:
         # blend x86 and amd64 artifacts together
         build_nsis_package('artifacts', '.instdist-ubuntu-x86', '.instdist-ubuntu-amd64')
 
-    - name: Build NSIS Setup
+    - name: Build NSIS Setup (x86)
       shell: python
       run: |
         import sys, os
         sys.path.insert(0, r'${{github.workspace}}')
-        from nsis_build import *
-        # ----- nsis_build.py -----
-        build_nsis_installer('.instdist-ubuntu-x86', 'x86', ${{github.run_number}})
-        build_nsis_installer('.instdist-ubuntu-amd64', 'amd64', ${{github.run_number}})
+        from nsis_package import *
+        # ----- nsis_package.py -----
+        build_nsis_installer('.instdist-ubuntu-x86', 'x86', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
+
+    - name: Build NSIS Setup (amd64)
+      shell: python
+      run: |
+        import sys, os
+        sys.path.insert(0, r'${{github.workspace}}')
+        from nsis_package import *
+        # ----- nsis_package.py -----
+        build_nsis_installer('.instdist-ubuntu-amd64', 'amd64', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
 
     - name: Upload NSIS Setup (x86)
       uses: actions/upload-artifact@v4

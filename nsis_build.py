@@ -172,65 +172,47 @@ def build_cppunit(compiler, arch, cppunitdir):
     os.chdir(curdir)
 
 
-def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist']):
+def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist']):
     """
     Build a NSIS distribution package. \n
     `zlib` and `cppunit` must be built as well.
     """
     compiler, arch, vars = setup_environ(compiler, arch)
+
     if os.name == 'nt':
         if path.exists(path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
             os.environ['PATH'] += os.pathsep + path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')     # NSIS.chm
+
     args = [f'scons',
             f'TARGET_ARCH={arch}',
             f'ZLIB_W32={zlibdir}',
-            f'VERSION={nsis_version(buildno)}',
+            f'VERSION={nsis_version(build_number=build_number)}',
             f'VER_MAJOR={nsis_major_version()}',
             f'VER_MINOR={nsis_minor_version()}',
             f'VER_REVISION={nsis_revision_number()}',
-            f'VER_BUILD={nsis_build_number(buildno)}',
-            f'VER_PACKED={nsis_packed_version(buildno)}',
+            f'VER_BUILD={nsis_build_number(build_number)}',
+            f'VER_PACKED={nsis_packed_version(build_number=build_number)}',
             f'DISTNAME=negrutiu-{compiler}',
             f'STRIP=1',
             f'SKIP_UTILS="NSIS Menu"',
             f'NSIS_CONFIG_LOG={"Yes" if nsislog else "No"}',
             f'NSIS_CONFIG_LOG_TIMESTAMP={"Yes" if nsislog else "No"}',
             f'NSIS_MAX_STRLEN={nsismaxstrlen}']
+
+    if compiler == 'gcc' and os.name == 'nt':
+        args += ['TOOLSET=gcc,gnulink,mingw']   # use mingw toolset in Windows
+
     if compiler == 'gcc':
-        if os.name == 'nt':
-            args += ['TOOLSET=gcc,gnulink,mingw']   # building in Windows using mingw
         args += ['APPEND_LINKFLAGS=-static']
-    if cppunitdir and 'test' in actions:
-        args += [f'APPEND_CPPPATH={path.join(cppunitdir, "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}']
+
+    if cppunitdir is not None and 'test' in actions:
+        args += [
+            f'APPEND_CPPPATH={path.join(cppunitdir, "include")}',
+            f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}'
+            ]
+
     args += actions
-    run(args)
 
-
-def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
-    """ Build NSIS installer from an existing set of binaries. """
-    # hack: set NSISDIR and NSISCONFDIR variables to help makensis find its stuff (headers, stubs) on posix
-    nsisdir = path.abspath(nsisdir)
-    os.environ['NSISDIR'] = nsisdir
-    os.environ['NSISCONFDIR'] = nsisdir
-    makensis = path.join(nsisdir, 'makensis.exe' if os.name == 'nt' else 'makensis')      # 'makensis' on posix, 'makensis.exe' on windows
-    if os.name == 'posix':
-        mode = stat.S_IMODE(os.lstat(makensis).st_mode)
-        os.chmod(makensis, mode | stat.S_IXUSR)     # `chmod u+x makensis`
-    args = [
-        makensis,
-        f'-DOUTFILE={outfile if outfile else path.join(nsisdir, f"nsis-{nsis_version(buildno)}-negrutiu-{arch}.exe")}',
-        f'-DVERSION={nsis_version(buildno)}',
-        f'-DVER_MAJOR={nsis_major_version()}',
-        f'-DVER_MINOR={nsis_minor_version()}',
-        f'-DVER_REVISION={nsis_build_number(buildno)}',
-        f'-DVER_BUILD={nsis_version(buildno)}',
-        r'-DLINK_INFO=https://github.com/negrutiu/nsis',
-        r'-DVER_PRODUCTNAME=Unofficial NSIS fork by Marius Negrutiu',
-        r'-DVER_LEGALTRADEMARKS=https://github.com/negrutiu/nsis',
-        r'-DEXTRA_WELCOME_TEXT=$\r$\n$\r$\n$\r$\n(*) This is an unofficial fork from https://github.com/negrutiu/nsis$\r$\n',
-        r'-V4',
-        path.join(nsisdir, 'Examples', 'makensis-fork.nsi')
-    ]
     run(args)
 
 
@@ -268,5 +250,3 @@ if __name__ == '__main__':
     print(separator)
     actions = ['test', 'dist'] if args.tests else ['dist']
     build_nsis_distro(args.compiler, args.arch, args.build_number, zlibdir, cppunitdir, args.nsis_log, args.nsis_max_strlen, actions)
-
-    build_nsis_installer(path.join(workdir, '.instdist'), args.arch, args.build_number)
