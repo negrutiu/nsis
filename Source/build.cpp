@@ -405,13 +405,8 @@ CEXEBuild::CEXEBuild(signed char pponly, bool warnaserror) :
 
 void CEXEBuild::initialize(const TCHAR *makensis_path)
 {
-  TCHAR cwd[256]{};
-  _tgetcwd(cwd, _countof(cwd));
-  printf("** getcwd = %ls\n", cwd);
-
   tstring nsis_dir;
   const TCHAR *dir = _tgetenv(_T("NSISDIR"));
-  printf("** environment NSISDIR = %ls\n", dir ? dir : L"null");
   if (dir) nsis_dir = dir;
   else {
 #ifndef NSIS_CONFIG_CONST_DATA_PATH
@@ -421,16 +416,13 @@ void CEXEBuild::initialize(const TCHAR *makensis_path)
 #endif
   }
   definedlist.add(_T("NSISDIR"), nsis_dir.c_str());
-  printf("** nsis_dir = %ls\n", nsis_dir.c_str());
 
   tstring includes_dir = nsis_dir;
   includes_dir += PLATFORM_PATH_SEPARATOR_STR _T("Include");
   include_dirs.add(includes_dir.c_str(),0);
-  printf("** include_dir = %ls\n", includes_dir.c_str());
 
   stubs_dir = nsis_dir;
   stubs_dir += PLATFORM_PATH_SEPARATOR_STR _T("Stubs");
-  printf("** stubs_dir = %ls\n", stubs_dir.c_str());
 
   if (set_compressor(_T("zlib"), false) != PS_OK || set_target_architecture_data() != PS_OK)
   {
