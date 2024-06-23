@@ -561,11 +561,10 @@ if 'ZLIB_W32' in defenv:
 	defenv['ZLIB_W32_NEW_DLL'] = defenv.FindFile('zlib.dll',
 		[defenv['ZLIB_W32'], defenv['ZLIB_W32_LIB']])
 
-	# marius: VisualC needs absolute paths
-	if 'msvc' in defenv['TOOLS'] or 'mstoolkit' in defenv['TOOLS']:
-		for key in ['ZLIB_W32_INC', 'ZLIB_W32_LIB']:
-			if not os.path.isabs(defenv[key]):
-				defenv[key] = os.path.join(os.path.abspath(os.curdir), defenv[key])
+	# marius: better chances to find zlib using absolute paths
+	for key in ['ZLIB_W32_INC', 'ZLIB_W32_LIB']:
+		if not os.path.isabs(defenv[key]):
+			defenv[key] = os.path.join(os.path.abspath(os.curdir), defenv[key])
 
 	for name, value in defenv._dict.items():
 		if name.find('ZLIB') != -1 or name.find('APPEND') != -1:
