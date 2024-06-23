@@ -15,10 +15,13 @@ def run(args):
     if exitcode != 0:
         raise OSError(exitcode, f"subprocess exit code {exitcode}")
 
+
 def win_to_posix(path):
+    """ Convert `C:\\path\\file.ext` -> `/C/path/file.ext` """
     if path[1] == ':':
         return '/' + path.replace(':', '').replace('\\', '/')
     return path
+
 
 def setup_mingw_environ(arch):
     """
@@ -54,6 +57,7 @@ def setup_mingw_environ(arch):
     os.environ["PATH"] = path.join(mingwdir, 'bin') + os.pathsep + os.environ["PATH"]     # i.e. r"C:\msys64\mingw32\bin", r"C:\mingw32\bin"
 
     return {'msysdir': msysdir, 'mingwdir': mingwdir}
+
 
 def setup_msvc_environ(arch):
     """
@@ -97,6 +101,7 @@ def setup_msvc_environ(arch):
 
     return {'installationPath': instPath, 'platformToolset': toolset, 'archName': vsarch}
 
+
 def setup_environ(compiler, arch):
     """ Validate `compiler` and `arch` and set up the environment for them. """
     if compiler == 'mingw': compiler = 'gcc'
@@ -107,13 +112,13 @@ def setup_environ(compiler, arch):
     if arch == 'x64': arch = 'amd64'
     if arch != 'x86' and arch != 'amd64': raise Exception(f"unknown arch {arch}")
 
-    vars = {}
     if compiler == 'gcc':
-        vars = setup_mingw_environ(arch)
+        return [compiler, arch, setup_mingw_environ(arch)]
     elif compiler == 'msvc':
-        vars = setup_msvc_environ(arch)
+        return [compiler, arch, setup_msvc_environ(arch)]
+    else:
+        return None
 
-    return [compiler, arch, vars]
 
 def git_checkout(url, dir, depth = 1):
     """ Clone or Pull a git repository. """
@@ -128,6 +133,7 @@ def git_checkout(url, dir, depth = 1):
         run(['git', 'clone'] + (['--depth', str(depth)] if depth >= 1 else None) + [url, path.basename(dir)])
     os.chdir(curdir)
 
+
 def build_zlib(compiler, arch, zlibdir):
     compiler, arch, vars = setup_environ(compiler, arch)
     curdir = path.curdir
@@ -141,6 +147,7 @@ def build_zlib(compiler, arch, zlibdir):
         args = [f'cmd.exe', '/c', 'call', "vcvarsall.bat", arch, '&&', 'nmake.exe', '-f', 'win32/Makefile.msc', f'LOC=/MT', 'zlib1.dll', 'zdll.lib']
     run(args)
     os.chdir(curdir)
+
 
 def build_cppunit(compiler, arch, cppunitdir):
     if path.exists(path.join(cppunitdir, 'bin', 'DllPlugInTester.exe')) or path.exists(path.join(cppunitdir, 'lib', 'DllPlugInTester_dll.exe')):
@@ -163,6 +170,7 @@ def build_cppunit(compiler, arch, cppunitdir):
         args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'CppUnitLibraries2010.sln'), '/p:Configuration=Release', f'/p:Platform={vars["archName"]}', f'/p:PlatformToolset={vars["platformToolset" ]}']
         run(args)
     os.chdir(curdir)
+
 
 def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist']):
     """
@@ -197,8 +205,10 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
     args += actions
     run(args)
 
+
 def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
-    # hack: set NSISDIR and NSISCONFDIR variables to help makensis find stuff (headers, stubs) on posix
+    """ Build NSIS installer from an existing set of binaries. """
+    # hack: set NSISDIR and NSISCONFDIR variables to help makensis find its stuff (headers, stubs) on posix
     os.environ['NSISDIR'] = nsisdir
     os.environ['NSISCONFDIR'] = nsisdir
     makensis = path.join(nsisdir, 'makensis.exe' if os.name == 'nt' else 'makensis')      # 'makensis' on posix, 'makensis.exe' on windows
@@ -221,6 +231,7 @@ def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
         path.join(nsisdir, 'Examples', 'makensis-fork.nsi')
     ]
     run(args)
+
 
 if __name__ == '__main__':
     import argparse
