@@ -4,8 +4,9 @@
 
 /.depend/
 
+/artifacts/
 /build/
-/.instdist/
+/.instdist*/
 /.test/
 /nsis-*/
 /nsis-*.zip

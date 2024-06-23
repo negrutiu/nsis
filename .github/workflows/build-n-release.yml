@@ -197,8 +197,8 @@ jobs:
         sys.path.insert(0, r'${{github.workspace}}')
         from nsis_package import *
         # ----- nsis_package.py -----
-        # this step merges all artifacts into '.instdist-ubuntu-x86' and '.instdist-ubuntu-amd64' directories
-        build_nsis_package(os.path.join(r'${{github.workspace}}', 'artifacts'), r'${{github.workspace}}')
+        # blend x86 and amd64 artifacts together
+        build_nsis_package('artifacts', '.instdist-ubuntu-x86', '.instdist-ubuntu-amd64')
 
     - name: Build NSIS Setup
       shell: python
@@ -207,9 +207,8 @@ jobs:
         sys.path.insert(0, r'${{github.workspace}}')
         from nsis_build import *
         # ----- nsis_build.py -----
-        # this step builds the final installers
-        build_nsis_installer(os.path.join(r'${{github.workspace}}', '.instdist-ubuntu-x86'), 'x86', ${{github.run_number}})
-        build_nsis_installer(os.path.join(r'${{github.workspace}}', '.instdist-ubuntu-amd64'), 'amd64', ${{github.run_number}})
+        build_nsis_installer('.instdist-ubuntu-x86', 'x86', ${{github.run_number}})
+        build_nsis_installer('.instdist-ubuntu-amd64', 'amd64', ${{github.run_number}})
 
     - name: Upload NSIS Setup (x86)
       uses: actions/upload-artifact@v4

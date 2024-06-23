@@ -209,6 +209,7 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
 def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
     """ Build NSIS installer from an existing set of binaries. """
     # hack: set NSISDIR and NSISCONFDIR variables to help makensis find its stuff (headers, stubs) on posix
+    nsisdir = path.abspath(nsisdir)
     os.environ['NSISDIR'] = nsisdir
     os.environ['NSISCONFDIR'] = nsisdir
     makensis = path.join(nsisdir, 'makensis.exe' if os.name == 'nt' else 'makensis')      # 'makensis' on posix, 'makensis.exe' on windows

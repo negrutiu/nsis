@@ -4,92 +4,46 @@ import re
 import zipfile
 import shutil
 
-def build_nsis_package(artifacts, output=None):
+def merge_nsis_distros(distro_x86_dir, distro_amd64_dir, windows_x86_dir=None, windows_amd64_dir=None):
     """Merge together x86 and amd64 build packages to form the final NSIS package.
 
     NSIS packages (x86 and amd64) are built from the `ubuntu` packages, with
     some extra binaries from `windows` packages.
 
     Arguments:
-    artifacts: Input directory with build artifacts
-    output: Output directory where final packages are put
+    distro_x86_dir: `x86` distribution directory, usually `.instdist-ubuntu-x86`
+    distro_amd64_dir: `amd64` distribution directory, usually `.instdist-ubuntu-amd64`
+    windows_x86_dir: Optional Windows distro required if `distro_x86_dir` is a Posix distro
+    windows_amd64_dir: Optional Windows distro required if `distro_amd64_dir` is a Posix distro
     """
-    artifacts = path.abspath(artifacts)
-    if not output: output = artifacts
-    output = path.abspath(output)
-    # print(f"-- artifacts_dir = {artifacts}")
-    # print(f"-- output_dir = {output}")
-
-    windows_x86_dir   = path.join(output, '.instdist-windows-x86')
-    windows_amd64_dir = path.join(output, '.instdist-windows-amd64')
-    ubuntu_x86_dir    = path.join(output, '.instdist-ubuntu-x86')
-    ubuntu_amd64_dir  = path.join(output, '.instdist-ubuntu-amd64')
-
-    # unzip all files in `artifacts`
-    # this step does nothing when running in GitHub workflow, since artifacts are already unzipped
-    for file in listdir(artifacts):
-        zippath = path.join(artifacts, file)
-        if path.splitext(zippath)[1] == '.zip' and path.isfile(zippath):
-            unzipdir = path.join(artifacts, path.splitext(zippath)[0])
-            if not path.exists(unzipdir):
-                print(f"extract( {zippath} --> {unzipdir} )")
-                with zipfile.ZipFile(zippath) as zip:
-                    zip.extractall(unzipdir)
-
-    # extract the root directory from the inner .zip file (i.e. artifacts-ubuntu-latest-x86-gcc.zip => nsis-0.0.0.0-x86.zip => .\nsis-0.0.0.0 )
-    count = 0
-    for dir in listdir(artifacts):
-        if path.isdir(path.join(artifacts, dir)):
-
-            outdir = None
-            for srcre, dstdir in [
-                [r'^.*-windows-latest-x86-gcc$', windows_x86_dir], [r'^.*-windows-latest-amd64-gcc$', windows_amd64_dir],
-                [r'^.*-ubuntu-latest-x86-gcc$', ubuntu_x86_dir],   [r'^.*-ubuntu-latest-amd64-gcc$', ubuntu_amd64_dir]]:
-                if (re.match(srcre, dir)):
-                    outdir = dstdir
-            if outdir == None:
-                continue
-
-            for file in listdir(path.join(artifacts, dir)):
-                if re.match(r'^nsis-.+\.zip$', file) != None:
-                    count += 1
-                    print(f"extract( {path.join(artifacts, dir, file)} --> {artifacts} )")
-                    with zipfile.ZipFile(path.join(artifacts, dir, file)) as zip:
-                        rootdir = zip.filelist[0].filename.split("/")[0]
-                        zip.extractall(artifacts)
-                        if path.exists(outdir):
-                            shutil.rmtree(outdir)
-                        print(f"rename( {path.join(artifacts, rootdir)} --> {outdir} )")
-                        os.rename(path.join(artifacts, rootdir), outdir)
-
-    if count < 4:
-        raise Exception(f"found {count}/4 distribution directories")
 
     # copy files
     for srcdir, srcre, dstdir in [
         # copy Bin\makensisw.exe to root
-        [path.join(ubuntu_x86_dir, 'Bin'), r'makensisw\.exe', ubuntu_x86_dir],
-        [path.join(ubuntu_amd64_dir, 'Bin'), r'makensisw\.exe', ubuntu_amd64_dir],
+        [path.join(distro_x86_dir, 'Bin'), r'makensisw\.exe', distro_x86_dir],
+        [path.join(distro_amd64_dir, 'Bin'), r'makensisw\.exe', distro_amd64_dir],
         # copy missing root *.exe and *.chm from windows to ubuntu
-        [windows_x86_dir, r'^.*\.exe$', ubuntu_x86_dir],
-        [windows_x86_dir, r'^.*\.chm$', ubuntu_x86_dir],
-        [windows_amd64_dir, r'^.*\.exe$', ubuntu_amd64_dir],
-        [windows_amd64_dir, r'^.*\.chm$', ubuntu_amd64_dir],
+        [windows_x86_dir, r'^.*\.exe$', distro_x86_dir] if windows_x86_dir else [None, None, None],
+        [windows_x86_dir, r'^.*\.chm$', distro_x86_dir] if windows_x86_dir else [None, None, None],
+        [windows_amd64_dir, r'^.*\.exe$', distro_amd64_dir] if windows_amd64_dir else [None, None, None],
+        [windows_amd64_dir, r'^.*\.chm$', distro_amd64_dir] if windows_amd64_dir else [None, None, None],
         # copy missing Bin\*.exe from windows to ubuntu
-        [path.join(windows_x86_dir, 'Bin'), r'^.*\.exe$', path.join(ubuntu_x86_dir, 'Bin')],
-        [path.join(windows_amd64_dir, 'Bin'), r'^.*\.exe$', path.join(ubuntu_amd64_dir, 'Bin')],
+        [path.join(windows_x86_dir, 'Bin'), r'^.*\.exe$', path.join(distro_x86_dir, 'Bin')] if windows_x86_dir else [None, None, None],
+        [path.join(windows_amd64_dir, 'Bin'), r'^.*\.exe$', path.join(distro_amd64_dir, 'Bin')] if windows_amd64_dir else [None, None, None],
         # merge x86 and amd64 plugins
-        [path.join(ubuntu_x86_dir, 'Plugins', 'x86-ansi'), r'.*', path.join(ubuntu_amd64_dir, 'Plugins', 'x86-ansi')],
-        [path.join(ubuntu_x86_dir, 'Plugins', 'x86-unicode'), r'.*', path.join(ubuntu_amd64_dir, 'Plugins', 'x86-unicode')],
-        [path.join(ubuntu_amd64_dir, 'Plugins', 'amd64-unicode'), r'.*', path.join(ubuntu_x86_dir, 'Plugins', 'amd64-unicode')],
+        [path.join(distro_x86_dir, 'Plugins', 'x86-ansi'), r'.*', path.join(distro_amd64_dir, 'Plugins', 'x86-ansi')],
+        [path.join(distro_x86_dir, 'Plugins', 'x86-unicode'), r'.*', path.join(distro_amd64_dir, 'Plugins', 'x86-unicode')],
+        [path.join(distro_amd64_dir, 'Plugins', 'amd64-unicode'), r'.*', path.join(distro_x86_dir, 'Plugins', 'amd64-unicode')],
         # merge x86 and amd64 stubs
-        [path.join(ubuntu_x86_dir, 'Stubs'), r'^.+-x86-ansi$', path.join(ubuntu_amd64_dir, 'Stubs')],
-        [path.join(ubuntu_x86_dir, 'Stubs'), r'^.+-x86-unicode$', path.join(ubuntu_amd64_dir, 'Stubs')],
-        [path.join(ubuntu_amd64_dir, 'Stubs'), r'^.+-amd64-unicode$', path.join(ubuntu_x86_dir, 'Stubs')],
+        [path.join(distro_x86_dir, 'Stubs'), r'^.+-x86-ansi$', path.join(distro_amd64_dir, 'Stubs')],
+        [path.join(distro_x86_dir, 'Stubs'), r'^.+-x86-unicode$', path.join(distro_amd64_dir, 'Stubs')],
+        [path.join(distro_amd64_dir, 'Stubs'), r'^.+-amd64-unicode$', path.join(distro_x86_dir, 'Stubs')],
         # merge x86 and amd64 Bin\RegTool-*.bin
-        [path.join(ubuntu_x86_dir, 'Bin'), r'RegTool-x86\.bin', path.join(ubuntu_amd64_dir, 'Bin')],
-        [path.join(ubuntu_amd64_dir, 'Bin'), r'RegTool-amd64\.bin', path.join(ubuntu_x86_dir, 'Bin')],
+        [path.join(distro_x86_dir, 'Bin'), r'RegTool-x86\.bin', path.join(distro_amd64_dir, 'Bin')],
+        [path.join(distro_amd64_dir, 'Bin'), r'RegTool-amd64\.bin', path.join(distro_x86_dir, 'Bin')],
         ]:
+        if not srcdir or not srcre or not dstdir:
+            continue
         for file in listdir(srcdir):
             srcfile = path.join(srcdir, file)
             dstfile = path.join(dstdir, file)
@@ -99,10 +53,69 @@ def build_nsis_package(artifacts, output=None):
                     print(f"copy2( {srcfile} --> {dstfile} )")
                     shutil.copy2(srcfile, dstfile)
 
+
+def build_nsis_package(
+        artifacts_dir,
+        distro_x86_dir='.instdist-ubuntu-x86',
+        distro_amd64_dir='.instdist-ubuntu-amd64',
+        windows_x86_dir = '.instdist-windows-x86',
+        windows_amd64_dir = '.instdist-windows-amd64'
+        ):
+    """Merge together x86 and amd64 build packages to form the final NSIS package.
+
+    NSIS packages (x86 and amd64) are built from the `ubuntu` packages, with
+    some additional files from `windows` packages.
+    """
+    artifacts_dir = path.abspath(artifacts_dir)
+    # print(f"-- artifacts_dir = {artifacts_dir}")
+
+    # unzip all files in `artifacts`
+    # this step does nothing when running in GitHub workflow, since artifacts are already unzipped
+    for file in listdir(artifacts_dir):
+        zippath = path.join(artifacts_dir, file)
+        if re.match(r'^.*-gcc.zip$', zippath) and path.isfile(zippath):
+            unzipdir = path.join(artifacts_dir, path.splitext(zippath)[0])
+            if not path.exists(unzipdir):
+                print(f"extract( {zippath} --> {unzipdir} )")
+                with zipfile.ZipFile(zippath) as zip:
+                    zip.extractall(unzipdir)
+
+    # extract the root directory from the inner .zip file (i.e. artifacts-ubuntu-latest-x86-gcc.zip => nsis-0.0.0.0-x86.zip => .\nsis-0.0.0.0 )
+    for dir in listdir(artifacts_dir):
+        if path.isdir(path.join(artifacts_dir, dir)):
+
+            outdir = None
+            for srcre, dstdir in [
+                [r'^.+-ubuntu-latest-x86-gcc$',    distro_x86_dir],
+                [r'^.+-ubuntu-latest-amd64-gcc$',  distro_amd64_dir],
+                [r'^.+-windows-latest-x86-gcc$',   windows_x86_dir],
+                [r'^.+-windows-latest-amd64-gcc$', windows_amd64_dir]
+                ]:
+                if re.match(srcre, dir):
+                    outdir = dstdir
+                    break
+            if not outdir:
+                continue
+
+            for file in listdir(path.join(artifacts_dir, dir)):
+                if re.match(r'^nsis-.+\.zip$', file) != None:
+                    with zipfile.ZipFile(path.join(artifacts_dir, dir, file)) as zip:
+                        print(f"extract( {path.join(artifacts_dir, dir, file)} --> {artifacts_dir} )")
+                        with zipfile.ZipFile(path.join(artifacts_dir, dir, file)) as zip:
+                            rootdir = zip.filelist[0].filename.split("/")[0]
+                            zip.extractall(artifacts_dir)
+                            if path.exists(outdir):
+                                shutil.rmtree(outdir)
+                            print(f"rename( {path.join(artifacts_dir, rootdir)} --> {outdir} )")
+                            os.rename(path.join(artifacts_dir, rootdir), outdir)
+
+    # share files between distros
+    merge_nsis_distros(distro_x86_dir, distro_amd64_dir, windows_x86_dir, windows_amd64_dir)
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--artifacts-dir", type=str, default=path.join(path.dirname(__file__), 'artifacts'))
-    parser.add_argument("-o", "--output-dir", type=str, default=path.dirname(__file__))
+    parser.add_argument("-a", "--artifacts-dir", type=str, default='artifacts')
     args = parser.parse_args()
-    build_nsis_package(args.artifacts_dir,  args.output_dir)
+    build_nsis_package(args.artifacts_dir)
