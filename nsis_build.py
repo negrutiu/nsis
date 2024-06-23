@@ -8,6 +8,13 @@ from nsis_version import *
 # pacman -S mingw-w64-x86_64-toolchain
 # pacman -S libtool autoconf-wrapper automake-wrapper     (cppunit)
 
+def run(args):
+    """ Execute subprocess and raise exit code exceptions. """
+    print(f">> {args}")
+    exitcode = Popen(args).wait()
+    if exitcode != 0:
+        raise OSError(exitcode, f"subprocess exit code {exitcode}")
+
 def win_to_posix(path):
     if path[1] == ':':
         return '/' + path.replace(':', '').replace('\\', '/')
@@ -113,19 +120,13 @@ def git_checkout(url, dir, depth = 1):
     curdir = path.curdir
     if path.exists(path.join(dir, '.git')):
         os.chdir(dir)
-        args = ['git', 'pull']
-        print(f"-- {args} ({url})")
-        exitcode = Popen(args).wait()
+        run(['git', 'pull'])
     else:
         parentdir = path.dirname(dir)
         os.makedirs(parentdir, exist_ok=True)
         os.chdir(parentdir)
-        args = ['git', 'clone'] + (['--depth', str(depth)] if depth >= 1 else None) + [url, path.basename(dir)]
-        print(f"-- {args}")
-        exitcode = Popen(args).wait()
+        run(['git', 'clone'] + (['--depth', str(depth)] if depth >= 1 else None) + [url, path.basename(dir)])
     os.chdir(curdir)
-    if exitcode != 0:
-        raise OSError(exitcode, f"failed to pull zlib")    
 
 def build_zlib(compiler, arch, zlibdir):
     compiler, arch, vars = setup_environ(compiler, arch)
@@ -138,11 +139,8 @@ def build_zlib(compiler, arch, zlibdir):
         args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
     elif compiler == 'msvc':
         args = [f'cmd.exe', '/c', 'call', "vcvarsall.bat", arch, '&&', 'nmake.exe', '-f', 'win32/Makefile.msc', f'LOC=/MT', 'zlib1.dll', 'zdll.lib']
-    print(f"-- {args}")
-    exitcode = Popen(args).wait()
+    run(args)
     os.chdir(curdir)
-    if exitcode != 0:
-        raise OSError(exitcode, f"failed to build zlib")    
 
 def build_cppunit(compiler, arch, cppunitdir):
     if path.exists(path.join(cppunitdir, 'bin', 'DllPlugInTester.exe')) or path.exists(path.join(cppunitdir, 'lib', 'DllPlugInTester_dll.exe')):
@@ -160,16 +158,11 @@ def build_cppunit(compiler, arch, cppunitdir):
             [f'{prefix}make'],
             [f'{prefix}make', 'install']
             ]:
-            print(f"-- {args}")
-            exitcode = Popen(args).wait()
-            if exitcode != 0: raise OSError(exitcode, f"failed to build cppunit")
+            run(args)
     elif compiler == 'msvc':
         args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'CppUnitLibraries2010.sln'), '/p:Configuration=Release', f'/p:Platform={vars["archName"]}', f'/p:PlatformToolset={vars["platformToolset" ]}']
-        print(f'-- {args}')
-        exitcode = Popen(args).wait()
+        run(args)
     os.chdir(curdir)
-    if exitcode != 0:
-        raise OSError(exitcode, f"failed to build cppunit")
 
 def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist']):
     """
@@ -202,11 +195,7 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
     if cppunitdir and 'test' in actions:
         args += [f'APPEND_CPPPATH={path.join(cppunitdir, "include")}', f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}']
     args += actions
-    print(f"-- {args}")
-
-    exitcode = Popen(args).wait()
-    if exitcode != 0:
-        raise OSError(exitcode, f"failed to build nsis")
+    run(args)
 
 def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
     # hack: set NSISDIR and NSISCONFDIR variables to help makensis find stuff (headers, stubs) on posix
@@ -231,9 +220,7 @@ def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
         r'/V4',
         path.join(nsisdir, 'Examples', 'makensis-fork.nsi')
     ]
-    print(f"-- args = {args}")
-    if (exitcode := Popen(args).wait()) != 0:
-        raise OSError(exitcode, 'failed to build the installer')
+    run(args)
 
 if __name__ == '__main__':
     import argparse

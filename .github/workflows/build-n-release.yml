@@ -173,6 +173,7 @@ jobs:
           name: artifacts-${{matrix.os}}-${{matrix.arch}}-${{matrix.compiler}}
           path: nsis/nsis-*.zip
 
+  # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
   package:
     name: Package
@@ -199,11 +200,6 @@ jobs:
         # this step merges all artifacts into '.instdist-ubuntu-x86' and '.instdist-ubuntu-amd64' directories
         build_nsis_package(os.path.join(r'${{github.workspace}}', 'artifacts'), r'${{github.workspace}}')
 
-    - name: Debug
-      run: |
-        printenv
-        find .instdist-ubuntu-x86 -ls
-
     - name: Build NSIS Setup
       shell: python
       run: |
@@ -227,6 +223,8 @@ jobs:
         name: nsis-amd64-setup
         path: .instdist-ubuntu-amd64/nsis*-amd64.exe
   
+  # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
   release:
     name: Release Draft
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/github/')
