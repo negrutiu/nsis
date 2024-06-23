@@ -209,10 +209,9 @@ def build_nsis_distro(compiler, arch, buildno, zlibdir, cppunitdir=None, nsislog
         raise OSError(exitcode, f"failed to build nsis")
 
 def build_nsis_installer(nsisdir, arch, buildno, outfile=None):
-    # clear NSISDIR envvar to force makensis to load everything from curdir
-    if 'NSISDIR' in os.environ:
-        print(f"-- remove environment variable NSISDIR={os.environ('NSISDIR')}")
-        del(os.environ['NSISDIR'])
+    # hack: set NSISDIR and NSISCONFDIR variables to help makensis find stuff (headers, stubs) on posix
+    os.environ['NSISDIR'] = nsisdir
+    os.environ['NSISCONFDIR'] = nsisdir
     makensis = path.join(nsisdir, 'makensis.exe' if os.name == 'nt' else 'makensis')      # 'makensis' on posix, 'makensis.exe' on windows
     if os.name == 'posix':
         mode = stat.S_IMODE(os.lstat(makensis).st_mode)
