@@ -181,8 +181,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+    # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Download Artifacts
       uses: actions/download-artifact@v4
