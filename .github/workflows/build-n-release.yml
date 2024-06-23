@@ -201,6 +201,7 @@ jobs:
 
     - name: Debug
       run: |
+        printenv
         find .instdist-ubuntu-x86 -ls
 
     - name: Build NSIS Setup
