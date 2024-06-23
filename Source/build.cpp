@@ -405,9 +405,9 @@ CEXEBuild::CEXEBuild(signed char pponly, bool warnaserror) :
 
 void CEXEBuild::initialize(const TCHAR *makensis_path)
 {
-  char cwd[256]{};
-  getcwd(cwd, _countof(cwd));
-  printf("** getcwd = %s\n", cwd);
+  TCHAR cwd[256]{};
+  _tgetcwd(cwd, _countof(cwd));
+  printf("** getcwd = %ls\n", cwd);
 
   tstring nsis_dir;
   const TCHAR *dir = _tgetenv(_T("NSISDIR"));
