@@ -1,12 +1,22 @@
-import subprocess, re, os
+import subprocess
+import re
+import os
 from os import path
 
+def nsis_version_from_history_but():
+    """ Read latest version from `history.but`. Returns `(major, minor)` tuple. """
+    with open(path.join(path.dirname(__file__), 'Docs', 'src', 'history.but')) as fin:
+        matches = re.findall(r'\\H{v(\d+)\.(\d+)}', fin.read())
+        # print(matches)
+        return int(matches[0][0]), int(matches[0][1])
 
 def nsis_major_version():
-    return 3    # todo: extract from history.but
+    major, minor = nsis_version_from_history_but()
+    return major
 
 def nsis_minor_version():
-    return 11   # todo: extract from history.but
+    major, minor = nsis_version_from_history_but()
+    return minor
 
 def nsis_revision_number():
     # git log --grep=git-svn-id: -1
