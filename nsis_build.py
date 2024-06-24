@@ -43,7 +43,7 @@ def setup_mingw_environ(arch):
         if path.exists(sh := path.join(os.environ['SystemDrive'] + path.sep, subdir, 'usr', 'bin', 'sh.exe')):
             msysdir = path.join(os.environ['SystemDrive'] + path.sep, subdir)
             break
-    if not msysdir: raise Exception('msys2 not found')
+    if msysdir is None: raise Exception('msys2 not found')
     print(f"-- msysdir = {msysdir}")
     os.environ["PATH"] = path.join(msysdir, 'usr', 'bin') + os.pathsep + os.environ["PATH"]   # i.e r"C:\msys64\usr\bin"
 
@@ -52,7 +52,7 @@ def setup_mingw_environ(arch):
         if path.exists(gcc := path.join(os.environ['SystemDrive'] + path.sep, subdir, 'bin', 'gcc.exe')):
             mingwdir = path.join(os.environ['SystemDrive'] + path.sep, subdir)
             break
-    if not mingwdir: raise Exception(f"mingw{bitness} not found")
+    if mingwdir is None: raise Exception(f"mingw{bitness} not found")
     print(f"-- mingwdir = {mingwdir}")
     os.environ["PATH"] = path.join(mingwdir, 'bin') + os.pathsep + os.environ["PATH"]     # i.e. r"C:\msys64\mingw32\bin", r"C:\mingw32\bin"
 
@@ -105,8 +105,8 @@ def setup_msvc_environ(arch):
 def setup_environ(compiler, arch):
     """ Validate `compiler` and `arch` and set up the environment for them. """
     if compiler == 'mingw': compiler = 'gcc'
-    if compiler != 'gcc' and compiler != 'msvc': raise Exception(f"unknown compiler {compiler}")
-    if compiler == 'msvc' and os.name != 'nt': raise Exception(f"{compiler} not available on {os.name}")
+    if compiler not in ['gcc', 'msvc']: raise Exception(f"unknown compiler {compiler}")
+    if compiler == 'msvc' and os.name != 'nt': raise Exception(f"{compiler} not supported on {os.name}")
 
     if arch == "Win32": arch = 'x86'
     if arch == 'x64': arch = 'amd64'
@@ -116,8 +116,6 @@ def setup_environ(compiler, arch):
         return [compiler, arch, setup_mingw_environ(arch)]
     elif compiler == 'msvc':
         return [compiler, arch, setup_msvc_environ(arch)]
-    else:
-        return None
 
 
 def git_checkout(url, dir, depth = 1):
@@ -157,8 +155,12 @@ def build_cppunit(compiler, arch, cppunitdir):
     curdir = path.curdir
     os.chdir(cppunitdir)
     if compiler == 'gcc':
-        prefix = 'mingw32-' if os.name == 'nt' else ""
-        outargs = [rf"--prefix={win_to_posix(path.join(cppunitdir, 'installed'))}", rf'--libdir={win_to_posix(path.join(cppunitdir, "lib"))}', rf"--bindir={win_to_posix(path.join(cppunitdir, 'bin'))}"]
+        prefix = 'mingw32-' if os.name == 'nt' else ''
+        outargs = [
+            rf"--prefix={win_to_posix(path.join(cppunitdir, 'installed'))}",
+            rf'--libdir={win_to_posix(path.join(cppunitdir, "lib"))}',
+            rf"--bindir={win_to_posix(path.join(cppunitdir, 'bin'))}"
+            ]
         for args in [
             ['sh', './autogen.sh'],
             ['sh', './configure', f'MAKE={prefix}make'] + outargs + ['LDFLAGS=-static', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
@@ -180,8 +182,8 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
     compiler, arch, vars = setup_environ(compiler, arch)
 
     if os.name == 'nt':
-        if path.exists(path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
-            os.environ['PATH'] += os.pathsep + path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')     # NSIS.chm
+        if path.exists(help_workshop := path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
+            os.environ['PATH'] += os.pathsep + help_workshop     # NSIS.chm
 
     args = [f'scons',
             f'TARGET_ARCH={arch}',
@@ -206,10 +208,8 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
         args += ['APPEND_LINKFLAGS=-static']
 
     if cppunitdir is not None and 'test' in actions:
-        args += [
-            f'APPEND_CPPPATH={path.join(cppunitdir, "include")}',
-            f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}'
-            ]
+        args += [f'APPEND_CPPPATH={path.join(cppunitdir, "include")}',
+                 f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}']
 
     args += actions
 

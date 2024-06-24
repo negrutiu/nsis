@@ -51,12 +51,12 @@ def merge_nsis_distros(distro_x86_dir, distro_amd64_dir, windows_x86_dir=None, w
         [path.join(distro_x86_dir, 'Bin'), r'RegTool-x86\.bin', path.join(distro_amd64_dir, 'Bin')],
         [path.join(distro_amd64_dir, 'Bin'), r'RegTool-amd64\.bin', path.join(distro_x86_dir, 'Bin')],
         ]:
-        if not srcdir or not srcre or not dstdir:
+        if srcdir is None or srcre is None or dstdir is None:
             continue
         for file in listdir(srcdir):
             srcfile = path.join(srcdir, file)
             dstfile = path.join(dstdir, file)
-            if re.match(srcre, file) != None and path.isfile(srcfile):
+            if re.match(srcre, file) is not None and path.isfile(srcfile):
                 if not path.exists(dstfile):
                     os.makedirs(dstdir, exist_ok=True)
                     print(f"copy2( {srcfile} --> {dstfile} )")
@@ -99,7 +99,7 @@ def build_nsis_package(
                 if re.match(srcre, dir):
                     outdir = dstdir
                     break
-            if not outdir:
+            if outdir is None:
                 continue
 
             for file in listdir(path.join(artifacts_dir, dir)):
@@ -131,12 +131,15 @@ def build_nsis_installer(
     """ Build NSIS installer from an existing distribution package. """
     # hack: set NSISDIR and NSISCONFDIR variables to help makensis find its stuff (headers, stubs) on posix
     distro_dir = path.abspath(distro_dir)
+
     os.environ['NSISDIR'] = distro_dir
     os.environ['NSISCONFDIR'] = distro_dir
+
     makensis = path.join(distro_dir, 'makensis.exe' if os.name == 'nt' else 'makensis')      # 'makensis' on posix, 'makensis.exe' on windows
     if os.name == 'posix':
         mode = stat.S_IMODE(os.lstat(makensis).st_mode)
         os.chmod(makensis, mode | stat.S_IXUSR)     # `chmod u+x makensis`
+
     args = [
         makensis,
         f'-DOUTFILE={outfile if outfile is not None else path.join(distro_dir, f"nsis-{nsis_version(major_version, minor_version, revision_number, build_number)}-negrutiu-{arch}.exe")}',
