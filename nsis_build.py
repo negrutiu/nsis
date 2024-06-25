@@ -240,6 +240,7 @@ if __name__ == '__main__':
     print(separator)
     build_zlib(args.compiler, args.arch, zlibdir)
 
+    cppunitdir = None
     if args.tests:
         cppunitdir = path.join(workdir, '.depend', 'cppunit')
         print(separator)
