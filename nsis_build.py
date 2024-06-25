@@ -22,6 +22,14 @@ def win_to_posix(path):
         return '/' + path.replace(':', '').replace('\\', '/')
     return path
 
+def validate_compatibility_with_htmlhelp(filepath):
+    """
+    Test if the specified path is compatible with `htmlhelp`.  
+    `htmlhelp` fails to read input from subdirectories that start with a dot (e.g. `C:\\dir1\\.dir2\\test.hhp` will fail because of `.dir2`)
+    """
+    for item in path.normpath(filepath).split(os.sep):
+        if item.startswith('.'):
+            raise Exception(f'directory "{filepath}" is incompatible with "HTML Help" because "{item}" starts with a dot. "NSIS.chm" will fail to build')
 
 def setup_mingw_environ(arch):
     """
@@ -184,6 +192,7 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
     if os.name == 'nt':
         if path.exists(help_workshop := path.join(os.environ['PROGRAMFILES(X86)'], 'HTML Help Workshop')):
             os.environ['PATH'] += os.pathsep + help_workshop     # NSIS.chm
+            validate_compatibility_with_htmlhelp(path.dirname(__file__))
 
     args = [f'scons',
             f'TARGET_ARCH={arch}',
