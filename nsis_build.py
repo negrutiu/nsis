@@ -232,10 +232,19 @@ if __name__ == '__main__':
     parser.add_argument("-a", "--arch", type=str, default='x86', help='Output architecture (x86|amd64)')
     parser.add_argument("-b", "--build-number", type=int, default=0, help='NSIS build number')
     parser.add_argument("-c", "--compiler", type=str, default='gcc', help="Compiler (gcc|msvc)")
-    parser.add_argument("-l", "--nsis-log", type=bool, default=True, help='Enable NSIS logging. See LogSet and LogText')
+    parser.add_argument("-l", "--nsis-log", type=str, default='True', help='Enable NSIS logging. See LogSet and LogText')
     parser.add_argument("-s", "--nsis-max-strlen", type=int, default=4096, help='Sets NSIS maximum string length. See NSIS_MAX_STRLEN')
-    parser.add_argument("-t", "--tests", type=bool, default=True, help='Build and run NSIS unit tests')
+    parser.add_argument("-t", "--tests", type=str, default='False', help='Build and run NSIS unit tests')
     args = parser.parse_args()
+
+    def str_to_bool(str, default=True):
+        s = str.lower()
+        if s == 'true' or s == 'yes' or s == 'on':
+            return True
+        elif s == 'false' or s == 'no' or s == 'off':
+            return False
+        else:
+            return default
 
     separator = ''
 
@@ -250,7 +259,7 @@ if __name__ == '__main__':
     build_zlib(args.compiler, args.arch, zlibdir)
 
     cppunitdir = None
-    if args.tests:
+    if str_to_bool(args.tests):
         cppunitdir = path.join(workdir, '.depend', 'cppunit')
         print(separator)
         git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
@@ -258,5 +267,5 @@ if __name__ == '__main__':
         build_cppunit(args.compiler, args.arch, cppunitdir)
 
     print(separator)
-    actions = ['test', 'dist'] if args.tests else ['dist']
-    build_nsis_distro(args.compiler, args.arch, args.build_number, zlibdir, cppunitdir, args.nsis_log, args.nsis_max_strlen, actions)
+    actions = ['test', 'dist'] if str_to_bool(args.tests) else ['dist']
+    build_nsis_distro(args.compiler, args.arch, args.build_number, zlibdir, cppunitdir, str_to_bool(args.nsis_log), args.nsis_max_strlen, actions)
