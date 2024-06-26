@@ -561,6 +561,17 @@ if 'ZLIB_W32' in defenv:
 	defenv['ZLIB_W32_NEW_DLL'] = defenv.FindFile('zlib.dll',
 		[defenv['ZLIB_W32'], defenv['ZLIB_W32_LIB']])
 
+	# marius: better chances to find zlib using absolute paths
+	for key in ['ZLIB_W32_INC', 'ZLIB_W32_LIB']:
+		if not os.path.isabs(defenv[key]):
+			defenv[key] = os.path.join(os.path.abspath(os.curdir), defenv[key])
+
+	for name, value in defenv._dict.items():
+		if name.find('ZLIB') != -1 or name.find('APPEND') != -1:
+			print(f"-- {name} = ({type(value)}){value}")
+	for p in os.environ['PATH'].split(os.pathsep):
+		print(f"-- PATH = {p}")
+
 tools = defenv['TOOLS']
 
 envs = []
