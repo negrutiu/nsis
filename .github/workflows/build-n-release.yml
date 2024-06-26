@@ -52,7 +52,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Choco Dependencies
+      - name: Windows Dependencies
         if: startsWith(matrix.os, 'windows')
         run: |
           pip install -U scons
