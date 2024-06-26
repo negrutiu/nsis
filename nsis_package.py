@@ -159,8 +159,8 @@ def build_nsis_installer(
 
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser()
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
     parser.add_argument("-a", "--artifacts-dir", type=str, default='artifacts')
     parser.add_argument("-b", "--build-number", type=int, default=0)
     args = parser.parse_args()

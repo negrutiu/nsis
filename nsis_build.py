@@ -226,25 +226,20 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
 
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument_group('build')
-    parser.add_argument("-a", "--arch", type=str, default='x86', help='Output architecture (x86|amd64)')
-    parser.add_argument("-b", "--build-number", type=int, default=0, help='NSIS build number')
-    parser.add_argument("-c", "--compiler", type=str, default='gcc', help="Compiler (gcc|msvc)")
-    parser.add_argument("-l", "--nsis-log", type=str, default='True', help='Enable NSIS logging. See LogSet and LogText')
-    parser.add_argument("-s", "--nsis-max-strlen", type=int, default=4096, help='Sets NSIS maximum string length. See NSIS_MAX_STRLEN')
-    parser.add_argument("-t", "--tests", type=str, default='True', help='Build and run NSIS unit tests')
-    args = parser.parse_args()
+    def to_bool(str):
+        if str.lower() in ['true', 'yes', 'on', '1']: return True
+        elif str.lower() in ['false', 'no', 'off', '0']: return False
+        return None
 
-    def str_to_bool(str, default=True):
-        s = str.lower()
-        if s == 'true' or s == 'yes' or s == 'on':
-            return True
-        elif s == 'false' or s == 'no' or s == 'off':
-            return False
-        else:
-            return default
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument("-a", "--arch", type=str, default='x86', choices=['x86', 'amd64'], help='Output architecture (x86|amd64)')
+    parser.add_argument("-b", "--build-number", type=int, default=0, help='NSIS build number')
+    parser.add_argument("-c", "--compiler", type=str, default='gcc', choices=['gcc', 'msvc'], help="Compiler (gcc|msvc)")
+    parser.add_argument("-l", "--nsis-log", type=to_bool, default=True, help='Enable NSIS logging. See LogSet and LogText')
+    parser.add_argument("-s", "--nsis-max-strlen", type=int, default=4096, help='Sets NSIS maximum string length. See NSIS_MAX_STRLEN')
+    parser.add_argument("-t", "--tests", type=to_bool, default=True, help='Build and run NSIS unit tests')
+    args = parser.parse_args()
 
     separator = ''
 
@@ -259,7 +254,7 @@ if __name__ == '__main__':
     build_zlib(args.compiler, args.arch, zlibdir)
 
     cppunitdir = None
-    if str_to_bool(args.tests):
+    if args.tests:
         cppunitdir = path.join(workdir, '.depend', 'cppunit')
         print(separator)
         git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
@@ -267,5 +262,5 @@ if __name__ == '__main__':
         build_cppunit(args.compiler, args.arch, cppunitdir)
 
     print(separator)
-    actions = ['test', 'dist'] if str_to_bool(args.tests) else ['dist']
-    build_nsis_distro(args.compiler, args.arch, args.build_number, zlibdir, cppunitdir, str_to_bool(args.nsis_log), args.nsis_max_strlen, actions)
+    actions = ['test', 'dist'] if args.tests else ['dist']
+    build_nsis_distro(args.compiler, args.arch, args.build_number, zlibdir, cppunitdir, args.nsis_log, args.nsis_max_strlen, actions)
