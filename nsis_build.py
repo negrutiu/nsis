@@ -23,13 +23,9 @@ def win_to_posix(path):
     return path
 
 def validate_compatibility_with_htmlhelp(filepath):
-    """
-    Test if the specified path is compatible with `htmlhelp`.  
-    `htmlhelp` fails to read input from subdirectories that start with a dot (e.g. `C:\\dir1\\.dir2\\test.hhp` will fail because of `.dir2`)
-    """
     for item in path.normpath(filepath).split(os.sep):
         if item.startswith('.'):
-            raise Exception(f'directory "{filepath}" is incompatible with "HTML Help" because "{item}" starts with a dot. "NSIS.chm" will fail to build')
+            raise Exception(f'directory "{filepath}" is incompatible with "HTML Help Workshop" because "{item}" starts with a dot. "NSIS.chm" will fail to build')
 
 def setup_mingw_environ(arch):
     """
@@ -80,12 +76,12 @@ def setup_msvc_environ(arch):
     if os.name != 'nt':
         return None
 
-    if path.exists(vswhere := f"{os.environ.get('PROGRAMFILES(X86)', '*')}\\Microsoft Visual Studio\\Installer\\vswhere.exe"): pass
-    elif path.exists(vswhere := f"{os.environ.get('PROGRAMFILES', '*')}\\Microsoft Visual Studio\\Installer\\vswhere.exe"): pass
+    if path.exists(vswhere := path.join(os.environ.get('PROGRAMFILES(X86)', '*'), 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')): pass
+    elif path.exists(vswhere := path.join(os.environ.get('PROGRAMFILES', '*'), 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')): pass
     else: raise Exception('vswhere.exe not found')
 
     process = Popen([vswhere, '-latest', '-sort', '-format', 'json'], stdout=PIPE, stderr=PIPE)
-    (cout, cerr) = process.communicate()
+    cout, cerr = process.communicate()
     process.wait()
     # print(cout.decode('utf-8'))
     jout = json.loads(cout)
@@ -184,7 +180,7 @@ def build_cppunit(compiler, arch, cppunitdir):
 
 def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist']):
     """
-    Build a NSIS distribution package. \n
+    Build a NSIS distribution package. 
     `zlib` and `cppunit` must be built as well.
     """
     compiler, arch, vars = setup_environ(compiler, arch)
