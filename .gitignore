@@ -6,6 +6,7 @@
 
 /artifacts/
 /build/
+/build-local*/
 /.instdist*/
 /.test/
 /nsis-*/
