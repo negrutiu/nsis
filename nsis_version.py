@@ -56,6 +56,17 @@ def nsis_packed_version(
     buildno = min(nsis_build_number(build_number), 0xfff)
     return '0x%0.2x%0.3x%0.3x' % (majver, minver, buildno)
 
+def nsis_distro_name():
+    process = subprocess.Popen(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE)
+    (cout, cerr) = process.communicate()
+    exitcode = process.wait()
+    if exitcode != 0:
+        raise OSError(exitcode, f"subprocess exit code {exitcode}")
+
+    distro = path.basename(cout.decode('utf-8')).replace('\r', '').replace('\n', '').replace(' ', '_')      # current branch name
+    if distro == 'master':
+        distro = 'negrutiu'
+    return distro
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -65,3 +76,4 @@ if __name__ == '__main__':
     
     print(f"version={nsis_version(build_number=args.build_number)}")
     print(f"packed_version={nsis_packed_version(build_number=args.build_number)}")
+    print(f"distro_name={nsis_distro_name()}")

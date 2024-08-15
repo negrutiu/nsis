@@ -142,7 +142,7 @@ def build_nsis_installer(
 
     args = [
         makensis,
-        f'-DOUTFILE={outfile if outfile is not None else path.join(distro_dir, f"nsis-{nsis_version(major_version, minor_version, revision_number, build_number)}-negrutiu-{arch}.exe")}',
+        f'-DOUTFILE={outfile if outfile is not None else path.join(distro_dir, f"nsis-{nsis_version(major_version, minor_version, revision_number, build_number)}-{nsis_distro_name()}-{arch}.exe")}',
         f'-DVERSION={nsis_version(major_version, minor_version, revision_number, build_number)}',
         f'-DVER_MAJOR={major_version}',
         f'-DVER_MINOR={minor_version}',

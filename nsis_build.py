@@ -199,7 +199,7 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
             f'VER_REVISION={nsis_revision_number()}',
             f'VER_BUILD={nsis_build_number(build_number)}',
             f'VER_PACKED={nsis_packed_version(build_number=build_number)}',
-            f'DISTNAME=negrutiu-{compiler}',
+            f'DISTNAME={nsis_distro_name()}-{compiler}',
             f'STRIP=1',
             f'SKIP_UTILS="NSIS Menu"',
             f'NSIS_CONFIG_LOG={"Yes" if nsislog else "No"}',
