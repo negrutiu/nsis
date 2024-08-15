@@ -55,7 +55,10 @@ jobs:
       - name: Windows Dependencies
         if: startsWith(matrix.os, 'windows')
         run: |
-          pip install -U scons
+          # install scons excluding build 4.8.0 (https://github.com/SCons/scons/issues/4585)
+          pip install -U scons!=4.8.0
+          #pip install -U scons
+
           # microsoft removed the download of htmlhelp.exe -- https://chocolatey.org/packages/html-help-workshop#comment-5245282888
           #choco install html-help-workshop 
           echo "${Env:ProgramFiles(x86)}\HTML Help Workshop" >> $Env:GITHUB_PATH
