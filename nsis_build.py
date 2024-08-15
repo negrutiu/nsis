@@ -210,6 +210,10 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
         args += ['TOOLSET=gcc,gnulink,mingw']   # use mingw toolset in Windows
 
     if compiler == 'gcc':
+        if arch == 'x86':
+            args += ['APPEND_CCFLAGS=-march=pentium2']
+        elif arch == 'amd64':
+            args += ['APPEND_CCFLAGS=-march=x86-64']
         args += ['APPEND_LINKFLAGS=-static']
 
     if cppunitdir is not None and 'test' in actions:
