@@ -63,6 +63,10 @@ jobs:
           #choco install html-help-workshop 
           echo "${Env:ProgramFiles(x86)}\HTML Help Workshop" >> $Env:GITHUB_PATH
 
+          echo -------------------------------------------------------------
+          py -0p
+          pip list
+
       - name: Upgrade msys2/mingw64
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
         uses: msys2/setup-msys2@v2
