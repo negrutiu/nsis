@@ -173,7 +173,7 @@ def build_cppunit(compiler, arch, cppunitdir):
             ]:
             run(args)
     elif compiler == 'msvc':
-        args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'CppUnitLibraries2010.sln'), '/p:Configuration=Release', f'/p:Platform={vars["archName"]}', f'/p:PlatformToolset={vars["platformToolset" ]}']
+        args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'cppunit', 'cppunit.vcxproj'), '/p:Configuration=Release', f'/p:Platform={vars["archName"]}', f'/p:PlatformToolset={vars["platformToolset" ]}']
         run(args)
     os.chdir(curdir)
 
