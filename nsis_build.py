@@ -178,6 +178,25 @@ def build_cppunit(compiler, arch, cppunitdir):
     os.chdir(curdir)
 
 
+def download_cppunit(cppunitdir):
+    """ Download and extract `cppunit` source code. """
+    if not path.exists(cppunitdir):
+        version = '1.15.1'
+        url = f'https://dev-www.libreoffice.org/src/cppunit-{version}.tar.gz'
+        tgz = f'{cppunitdir}-{version}.tar.gz'
+        print(f'downloading {url} -> {tgz} ...')
+        from urllib import request
+        with request.urlopen(url) as http:
+            with open(tgz, 'wb') as fout:
+                fout.write(http.read())
+        print('extracting ...')
+        import tarfile
+        with tarfile.open(tgz) as tf:
+            memberlist = [m for m in tf.getmembers() if m.name.startswith(f'cppunit-{version}')]
+            tf.extractall(path.dirname(cppunitdir), memberlist, numeric_owner=True, filter='data')
+        os.rename(path.join(path.dirname(cppunitdir), f'cppunit-{version}'), cppunitdir)
+
+
 def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist']):
     """
     Build a NSIS distribution package. 
@@ -258,7 +277,8 @@ if __name__ == '__main__':
     if args.tests:
         cppunitdir = path.join(workdir, '.depend', 'cppunit')
         print(separator)
-        git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
+        #git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)   # git server is unreliable lately
+        download_cppunit(cppunitdir)
         print(separator)
         build_cppunit(args.compiler, args.arch, cppunitdir)
 
