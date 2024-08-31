@@ -41,7 +41,7 @@ error_count = 0
 
 def build_thread(nsisdir, distrodir, compiler, arch, build_number=0, nsislog=True, nsismaxstrlen=4096, tests=True, new_console=True):
     copy_sources(nsisdir, distrodir)
-    args = [sys.executable, 'nsis_build.py', f'-a={arch}', f'-c={compiler}', f'-b={build_number}', f'-l={nsislog}', f'-s={nsismaxstrlen}', f'-t={tests}']
+    args = [sys.executable, path.join(nsisdir, distrodir, 'nsis_build.py'), f'-a={arch}', f'-c={compiler}', f'-b={build_number}', f'-l={nsislog}', f'-s={nsismaxstrlen}', f'-t={tests}']
     exitcode = Popen(args, cwd=distrodir, creationflags=(subprocess.CREATE_NEW_CONSOLE if new_console else 0)).wait()
     print(f"-- {args} returned {exitcode}")
     if exitcode != 0:
