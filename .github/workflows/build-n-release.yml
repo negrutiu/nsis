@@ -227,6 +227,19 @@ jobs:
         # ----- nsis_package.py -----
         build_nsis_installer('.instdist-ubuntu-amd64', 'amd64', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
 
+    - name: Debugging info
+      shell: python
+      run: |
+        import sys, os
+        print(f'-- __file__          | {__file__}')
+        print(f'-- abspath(__file__) | {os.path.abspath(__file__)}')
+        print(f'-- curdir            | {os.path.curdir}')
+        print(f'-- abspath(curdir)   | {os.path.abspath(os.path.curdir)}')
+
+        for root, dirs, files in os.walk(os.path.abspath(os.path.curdir)):
+          for name in files:
+            print(os.path.join(root, name))
+
     - name: Upload NSIS Setup (x86)
       uses: actions/upload-artifact@v4
       with:
