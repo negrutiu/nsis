@@ -41,7 +41,7 @@ def nsis_version(
         major_version=nsis_major_version(),
         minor_version=nsis_minor_version(),
         revision_number=nsis_revision_number(),
-        build_number = 0):
+        build_number=0):
     return f"{major_version}.{minor_version}.{revision_number}.{nsis_build_number(build_number)}"
 
 
@@ -49,12 +49,13 @@ def nsis_packed_version(
         major_version=nsis_major_version(),
         minor_version=nsis_minor_version(),
         revision_number=nsis_revision_number(),
-        build_number = 0):
+        build_number=0):
     # instead of '0xMMmmmrrb' we'll use '0xMMmmmbbb'. 'bbb' range is [0, 4095]
     majver = min(major_version, 0xff)
     minver = min(minor_version, 0xfff) 
     buildno = min(nsis_build_number(build_number), 0xfff)
     return '0x%0.2x%0.3x%0.3x' % (majver, minver, buildno)
+
 
 def nsis_distro_name():
     process = subprocess.Popen(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], stdout=subprocess.PIPE)

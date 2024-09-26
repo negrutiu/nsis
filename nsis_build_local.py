@@ -40,7 +40,9 @@ def copy_sources(srcdir, dstdir, verbose=False):
 error_count = 0
 
 def build_thread(nsisdir, distrodir, compiler, arch, build_number=0, nsislog=True, nsismaxstrlen=4096, tests=True, new_console=True):
+    # clone NSIS source code from current directory to {distrodir}
     copy_sources(nsisdir, distrodir)
+    # Run 'nsis_build.py'
     args = [sys.executable, path.join(nsisdir, distrodir, 'nsis_build.py'), f'-a={arch}', f'-c={compiler}', f'-b={build_number}', f'-l={nsislog}', f'-s={nsismaxstrlen}', f'-t={tests}']
     exitcode = Popen(args, cwd=distrodir, creationflags=(subprocess.CREATE_NEW_CONSOLE if new_console else 0)).wait()
     print(f"-- {args} returned {exitcode}")
@@ -68,11 +70,11 @@ if __name__ == '__main__':
     separator = '\n--------------------------------------------------------------------------------\n'
 
     nsisdir = path.dirname(__file__)
-    distro_x86_dir = path.join(nsisdir, f'build-local-{args.compiler}-x86')
+    distro_x86_dir   = path.join(nsisdir, f'build-local-{args.compiler}-x86')
     distro_amd64_dir = path.join(nsisdir, f'build-local-{args.compiler}-amd64')
 
     threads = [
-        Thread(target=build_thread, args=[nsisdir, distro_x86_dir, args.compiler, 'x86', args.build_number, args.nsis_log, args.nsis_max_strlen, args.tests, args.parallel]),
+        Thread(target=build_thread, args=[nsisdir, distro_x86_dir,   args.compiler, 'x86',   args.build_number, args.nsis_log, args.nsis_max_strlen, args.tests, args.parallel]),
         Thread(target=build_thread, args=[nsisdir, distro_amd64_dir, args.compiler, 'amd64', args.build_number, args.nsis_log, args.nsis_max_strlen, args.tests, args.parallel]),
     ]
 
@@ -94,14 +96,14 @@ if __name__ == '__main__':
         print("Tip: use --parallel=false argument to build sequentially and print the output to the main console")
         exit(error_count)
 
-    instdist_x86_dir = path.join(distro_x86_dir, '.instdist')
+    instdist_x86_dir   = path.join(distro_x86_dir,   '.instdist')
     instdist_amd64_dir = path.join(distro_amd64_dir, '.instdist')
 
     print(separator)
     merge_nsis_distros(instdist_x86_dir, instdist_amd64_dir)
 
     print(separator)
-    build_nsis_installer(instdist_x86_dir, 'x86', build_number=args.build_number, verbose_level=args.verbose_level)
+    build_nsis_installer(instdist_x86_dir,   'x86',   build_number=args.build_number, verbose_level=args.verbose_level)
     print(separator)
     build_nsis_installer(instdist_amd64_dir, 'amd64', build_number=args.build_number, verbose_level=args.verbose_level)
 
