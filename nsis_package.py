@@ -29,27 +29,27 @@ def merge_nsis_distros(distro_x86_dir, distro_amd64_dir, windows_x86_dir=None, w
     # copy files
     for srcdir, srcre, dstdir in [
         # copy Bin\makensisw.exe to root
-        [path.join(distro_x86_dir, 'Bin'), r'makensisw\.exe', distro_x86_dir],
-        [path.join(distro_amd64_dir, 'Bin'), r'makensisw\.exe', distro_amd64_dir],
+        [path.join(distro_x86_dir,    'Bin'), r'makensisw\.exe', distro_x86_dir],
+        [path.join(distro_amd64_dir,  'Bin'), r'makensisw\.exe', distro_amd64_dir],
         # copy missing root *.exe and *.chm from windows to ubuntu
-        [windows_x86_dir, r'^.*\.exe$', distro_x86_dir] if windows_x86_dir else [None, None, None],
-        [windows_x86_dir, r'^.*\.chm$', distro_x86_dir] if windows_x86_dir else [None, None, None],
+        [windows_x86_dir,   r'^.*\.exe$', distro_x86_dir]   if windows_x86_dir else [None, None, None],
+        [windows_x86_dir,   r'^.*\.chm$', distro_x86_dir]   if windows_x86_dir else [None, None, None],
         [windows_amd64_dir, r'^.*\.exe$', distro_amd64_dir] if windows_amd64_dir else [None, None, None],
         [windows_amd64_dir, r'^.*\.chm$', distro_amd64_dir] if windows_amd64_dir else [None, None, None],
         # copy missing Bin\*.exe from windows to ubuntu
-        [path.join(windows_x86_dir, 'Bin'), r'^.*\.exe$', path.join(distro_x86_dir, 'Bin')] if windows_x86_dir else [None, None, None],
+        [path.join(windows_x86_dir,   'Bin'), r'^.*\.exe$', path.join(distro_x86_dir,   'Bin')] if windows_x86_dir   else [None, None, None],
         [path.join(windows_amd64_dir, 'Bin'), r'^.*\.exe$', path.join(distro_amd64_dir, 'Bin')] if windows_amd64_dir else [None, None, None],
         # merge x86 and amd64 plugins
-        [path.join(distro_x86_dir, 'Plugins', 'x86-ansi'), r'.*', path.join(distro_amd64_dir, 'Plugins', 'x86-ansi')],
-        [path.join(distro_x86_dir, 'Plugins', 'x86-unicode'), r'.*', path.join(distro_amd64_dir, 'Plugins', 'x86-unicode')],
-        [path.join(distro_amd64_dir, 'Plugins', 'amd64-unicode'), r'.*', path.join(distro_x86_dir, 'Plugins', 'amd64-unicode')],
+        [path.join(distro_x86_dir,    'Plugins', 'x86-ansi'),      r'.*', path.join(distro_amd64_dir, 'Plugins', 'x86-ansi')],
+        [path.join(distro_x86_dir,    'Plugins', 'x86-unicode'),   r'.*', path.join(distro_amd64_dir, 'Plugins', 'x86-unicode')],
+        [path.join(distro_amd64_dir,  'Plugins', 'amd64-unicode'), r'.*', path.join(distro_x86_dir,   'Plugins', 'amd64-unicode')],
         # merge x86 and amd64 stubs
-        [path.join(distro_x86_dir, 'Stubs'), r'^.+-x86-ansi$', path.join(distro_amd64_dir, 'Stubs')],
-        [path.join(distro_x86_dir, 'Stubs'), r'^.+-x86-unicode$', path.join(distro_amd64_dir, 'Stubs')],
-        [path.join(distro_amd64_dir, 'Stubs'), r'^.+-amd64-unicode$', path.join(distro_x86_dir, 'Stubs')],
+        [path.join(distro_x86_dir,    'Stubs'), r'^.+-x86-ansi$',         path.join(distro_amd64_dir, 'Stubs')],
+        [path.join(distro_x86_dir,    'Stubs'), r'^.+-x86-unicode$',      path.join(distro_amd64_dir, 'Stubs')],
+        [path.join(distro_amd64_dir,  'Stubs'), r'^.+-amd64-unicode$',    path.join(distro_x86_dir,   'Stubs')],
         # merge x86 and amd64 Bin\RegTool-*.bin
-        [path.join(distro_x86_dir, 'Bin'), r'RegTool-x86\.bin', path.join(distro_amd64_dir, 'Bin')],
-        [path.join(distro_amd64_dir, 'Bin'), r'RegTool-amd64\.bin', path.join(distro_x86_dir, 'Bin')],
+        [path.join(distro_x86_dir,    'Bin'), r'RegTool-x86\.bin',        path.join(distro_amd64_dir, 'Bin')],
+        [path.join(distro_amd64_dir,  'Bin'), r'RegTool-amd64\.bin',      path.join(distro_x86_dir,   'Bin')],
         ]:
         if srcdir is None or srcre is None or dstdir is None:
             continue
