@@ -227,7 +227,7 @@ jobs:
         # ----- nsis_package.py -----
         build_nsis_installer('.instdist-ubuntu-amd64', 'amd64', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
 
-    - name: Debugging info
+    - name: List workdir contents
       shell: python
       run: |
         import sys, os
@@ -245,12 +245,14 @@ jobs:
       with:
         name: nsis-x86-setup
         path: .instdist-ubuntu-x86/nsis*-x86.exe
+        include-hidden-files: true    # https://github.com/actions/upload-artifact/issues/618
 
     - name: Upload NSIS Setup (amd64)
       uses: actions/upload-artifact@v4
       with:
         name: nsis-amd64-setup
         path: .instdist-ubuntu-amd64/nsis*-amd64.exe
+        include-hidden-files: true    # https://github.com/actions/upload-artifact/issues/618
   
   # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
