@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest]   # nothing works on macos-latest (`cppunit` fails to build. `zlib` not found)
+        os: [ubuntu-latest, windows-latest]   # nothing works on macos-latest (`cppunit` fails to build. `zlib` not found)
         arch: [x86, amd64]
         compiler: [gcc]
         include:
@@ -222,7 +222,7 @@ jobs:
   package:
     name: Package
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
 
     # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
