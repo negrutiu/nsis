@@ -91,10 +91,10 @@ def build_nsis_package(
 
             outdir = None
             for srcre, dstdir in [
-                [r'^.+-ubuntu-latest-x86-gcc$',    distro_x86_dir],
-                [r'^.+-ubuntu-latest-amd64-gcc$',  distro_amd64_dir],
-                [r'^.+-windows-latest-x86-gcc$',   windows_x86_dir],
-                [r'^.+-windows-latest-amd64-gcc$', windows_amd64_dir]
+                [r'^.+-ubuntu-[\w\.]+-x86-gcc$',    distro_x86_dir],
+                [r'^.+-ubuntu-[\w\.]+-amd64-gcc$',  distro_amd64_dir],
+                [r'^.+-windows-[\w\.]+-x86-gcc$',   windows_x86_dir],
+                [r'^.+-windows-[\w\.]+-amd64-gcc$', windows_amd64_dir]
                 ]:
                 if re.match(srcre, dir):
                     outdir = dstdir
