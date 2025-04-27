@@ -283,5 +283,6 @@ if __name__ == '__main__':
         build_cppunit(args.compiler, args.arch, cppunitdir)
 
     print(separator)
-    actions = ['test', 'dist'] if args.tests else ['dist']
+    actions = ['test'] if args.tests else []
+    actions.append('dist' if os.name == 'nt' else 'dist-zip')
     build_nsis_distro(args.compiler, args.arch, args.build_number, zlibdir, cppunitdir, args.nsis_log, args.nsis_max_strlen, actions)
