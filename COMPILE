@@ -37,6 +37,7 @@ Download:
 Install mingw (both x86 and amd64):
 	pacman -S mingw-w64-x86_64-toolchain
 	pacman -S mingw-w64-i686-toolchain
+	pacman -S autotools
 
 *********************************
 ** Python + SCons

@@ -51,19 +51,15 @@ def build_thread(nsisdir, distrodir, compiler, arch, build_number=0, nsislog=Tru
         error_count += 1
 
 if __name__ == '__main__':
-    def to_bool(str):
-        if str.lower() in ['true', 'yes', 'on', '1']: return True
-        elif str.lower() in ['false', 'no', 'off', '0']: return False
-        return None
 
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument("-b", "--build-number", type=int, default=0, help='NSIS build number')
     parser.add_argument("-c", "--compiler", type=str, default='gcc', choices=['gcc', 'msvc'], help="Compiler (gcc|msvc)")
-    parser.add_argument("-l", "--nsis-log", type=to_bool, default=True, help='Enable NSIS logging. See LogSet and LogText')
+    parser.add_argument("-l", "--nsis-log", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default=True, help='Enable NSIS logging. See LogSet and LogText')
     parser.add_argument("-s", "--nsis-max-strlen", type=int, default=4096, help='Sets NSIS maximum string length. See NSIS_MAX_STRLEN')
-    parser.add_argument("-p", "--parallel", type=to_bool, default=True, help='Build x86 and amd64 in parallel. Disable to investigate build errors')
-    parser.add_argument("-t", "--tests", type=to_bool, default=True, help='Build and run NSIS unit tests')
+    parser.add_argument("-p", "--parallel", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default=True, help='Build x86 and amd64 in parallel. Disable to investigate build errors')
+    parser.add_argument("-t", "--tests", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default=True, help='Build and run NSIS unit tests')
     parser.add_argument("-v", "--verbose-level", type=int, default=3, help='makensis.exe verbosity level')
     args = parser.parse_args()
 
