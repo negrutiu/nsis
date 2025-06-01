@@ -1,6 +1,6 @@
 from glob import glob
 from os import path
-import os, sys, shutil
+import datetime, os, sys, shutil
 from subprocess import Popen
 from threading import Thread
 
@@ -78,7 +78,9 @@ if __name__ == '__main__':
         Thread(target=build_thread, args=[nsisdir, distro_amd64_dir, args.compiler, 'amd64', args.build_number, args.nsis_log, args.nsis_max_strlen, args.tests, args.parallel]),
     ]
 
-    print('building...')
+    buildStart = datetime.datetime.now()
+    print(f'\n-- build started at {buildStart}\n')
+
     if args.parallel:
         for th in threads:
             th.start()
@@ -90,6 +92,9 @@ if __name__ == '__main__':
             th.join()
             if error_count > 0:
                 break
+
+    buildEnd = datetime.datetime.now()
+    print(f'\n-- build ended at {buildEnd} (+{buildEnd - buildStart})\n')
 
     if error_count > 0:
         print(f"{error_count}/{len(threads)} architectures failed to build")
@@ -108,5 +113,6 @@ if __name__ == '__main__':
     build_nsis_installer(instdist_amd64_dir, 'amd64', build_number=args.build_number, verbose_level=args.verbose_level)
 
     print(separator)
-    print('all done.')
+    allEnd = datetime.datetime.now()
+    print(f'\n-- all done at {allEnd} (+{allEnd - buildStart})\n')
     print(separator)
