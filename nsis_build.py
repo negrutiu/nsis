@@ -8,6 +8,8 @@ from nsis_version import *
 # pacman -S mingw-w64-x86_64-toolchain
 # pacman -S libtool autoconf-wrapper automake-wrapper     (cppunit)
 
+scriptdir = path.dirname(path.abspath(__file__))
+
 def run(args):
     """ Execute subprocess and raise exit code exceptions. """
     print(f">> {args}")
@@ -43,8 +45,7 @@ def setup_mingw_environ(arch):
     mingwXX = lambda arch: 'mingw64' if arch == 'amd64' else 'mingw32'
 
     msysdir = None
-    for subdir in [path.join(cdrive, 'msys64'),
-                   path.join(cdrive, 'msys2')]:
+    for subdir in [path.join(cdrive, 'msys64')]:
         if path.exists(path.join(subdir, 'usr', 'bin', 'sh.exe')):
             msysdir = subdir
             break
@@ -53,8 +54,8 @@ def setup_mingw_environ(arch):
     os.environ["PATH"] = path.join(msysdir, 'usr', 'bin') + os.pathsep + os.environ["PATH"]   # i.e r"C:\msys64\usr\bin"
 
     mingwdir = None
-    for subdir in [path.join(msysdir, mingwXX(arch)),
-                   path.join(cdrive, mingwXX(arch))]:
+    for subdir in [path.join(cdrive, mingwXX(arch)),
+                   path.join(msysdir, mingwXX(arch)),]:
         if path.exists(path.join(subdir, 'bin', 'gcc.exe')):
             mingwdir = subdir
             break
