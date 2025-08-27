@@ -34,15 +34,15 @@ Download:
 	Search:		pacman -Ss PKNAME
 	Remove:		pacman -Rdd PKNAME
 
-Install mingw (both x86 and amd64):
+Install mingw (both x86 and amd64) and other dependencies:
 	pacman -S mingw-w64-x86_64-toolchain
 	pacman -S mingw-w64-i686-toolchain
-	pacman -S autotools
+	pacman -S libtool autoconf-wrapper automake-wrapper
 
 *********************************
 ** Python + SCons
 *********************************
-Python 3.7 and 3.8 (x64) are known to work well
+Python 3.x is known to work well
 
 Download:
 	https://www.python.org/downloads/release
@@ -72,7 +72,7 @@ Download:
 ** Build
 *********************************
 Run:
-	_build_ALL.bat
+	py nsis_build_local.py
 	Remain calm. It takes a few minutes to build...
 
 *********************************
