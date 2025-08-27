@@ -276,8 +276,8 @@ if __name__ == '__main__':
     if args.tests:
         cppunitdir = path.join(workdir, '.depend', 'cppunit')
         print(separator)
-        #git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)   # git server is unreliable lately
-        download_cppunit(cppunitdir)
+        git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)   # git server is unreliable lately
+        # download_cppunit(cppunitdir)
         print(separator)
         build_cppunit(args.compiler, args.arch, cppunitdir)
 
