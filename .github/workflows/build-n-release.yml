@@ -22,6 +22,7 @@ jobs:
       version_build: ${{steps.version.outputs.version_build}}
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-22.04, windows-latest]   # nothing works on macos-latest (`cppunit` fails to build. `zlib` not found)
         arch: [x86, amd64]
@@ -159,8 +160,8 @@ jobs:
             from nsis_build import *
             # ----- nsis_build.py -----
             cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
-            #git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)   # git server is unreliable lately
-            download_cppunit(cppunitdir)
+            git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)   # git server is sometimes down
+            # download_cppunit(cppunitdir)     # webserver is sometimes down
             build_cppunit(r'${{matrix.compiler}}', r'${{matrix.arch}}', cppunitdir)
 
       - name: Build NSIS

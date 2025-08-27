@@ -8,6 +8,8 @@ from nsis_version import *
 # pacman -S mingw-w64-x86_64-toolchain
 # pacman -S libtool autoconf-wrapper automake-wrapper     (cppunit)
 
+scriptdir = path.dirname(path.abspath(__file__))
+
 def run(args):
     """ Execute subprocess and raise exit code exceptions. """
     print(f">> {args}")
@@ -39,24 +41,25 @@ def setup_mingw_environ(arch):
     if os.name != 'nt':
         return None
 
-    if arch == 'x86': bitness = '32'
-    if arch == 'amd64': bitness = '64'
+    cdrive = os.environ['SystemDrive'] + path.sep
+    mingwXX = lambda arch: 'mingw64' if arch == 'amd64' else 'mingw32'
 
     msysdir = None
-    for subdir in ['msys64', 'msys2']:
-        if path.exists(sh := path.join(os.environ['SystemDrive'] + path.sep, subdir, 'usr', 'bin', 'sh.exe')):
-            msysdir = path.join(os.environ['SystemDrive'] + path.sep, subdir)
+    for subdir in [path.join(cdrive, 'msys64')]:
+        if path.exists(path.join(subdir, 'usr', 'bin', 'sh.exe')):
+            msysdir = subdir
             break
     if msysdir is None: raise Exception('msys2 not found')
     print(f"-- msysdir = {msysdir}")
     os.environ["PATH"] = path.join(msysdir, 'usr', 'bin') + os.pathsep + os.environ["PATH"]   # i.e r"C:\msys64\usr\bin"
 
     mingwdir = None
-    for subdir in [path.join(msysdir, f'mingw{bitness}'), f'mingw{bitness}']:
-        if path.exists(gcc := path.join(os.environ['SystemDrive'] + path.sep, subdir, 'bin', 'gcc.exe')):
-            mingwdir = path.join(os.environ['SystemDrive'] + path.sep, subdir)
+    for subdir in [path.join(cdrive, mingwXX(arch)),
+                   path.join(msysdir, mingwXX(arch)),]:
+        if path.exists(path.join(subdir, 'bin', 'gcc.exe')):
+            mingwdir = subdir
             break
-    if mingwdir is None: raise Exception(f"mingw{bitness} not found")
+    if mingwdir is None: raise Exception(f"{mingwXX(arch)} not found")
     print(f"-- mingwdir = {mingwdir}")
     os.environ["PATH"] = path.join(mingwdir, 'bin') + os.pathsep + os.environ["PATH"]     # i.e. r"C:\msys64\mingw32\bin", r"C:\mingw32\bin"
 
@@ -246,19 +249,15 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
 
 
 if __name__ == '__main__':
-    def to_bool(str):
-        if str.lower() in ['true', 'yes', 'on', '1']: return True
-        elif str.lower() in ['false', 'no', 'off', '0']: return False
-        return None
 
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument("-a", "--arch", type=str, default='x86', choices=['x86', 'amd64'], help='Output architecture (x86|amd64)')
     parser.add_argument("-b", "--build-number", type=int, default=0, help='NSIS build number')
     parser.add_argument("-c", "--compiler", type=str, default='gcc', choices=['gcc', 'msvc'], help="Compiler (gcc|msvc)")
-    parser.add_argument("-l", "--nsis-log", type=to_bool, default=True, help='Enable NSIS logging. See LogSet and LogText')
+    parser.add_argument("-l", "--nsis-log", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default=True, help='Enable NSIS logging. See LogSet and LogText')
     parser.add_argument("-s", "--nsis-max-strlen", type=int, default=4096, help='Sets NSIS maximum string length. See NSIS_MAX_STRLEN')
-    parser.add_argument("-t", "--tests", type=to_bool, default=True, help='Build and run NSIS unit tests')
+    parser.add_argument("-t", "--tests", type=lambda x: (str(x).lower() in ['true','1', 'yes']), default=True, help='Build and run NSIS unit tests')
     args = parser.parse_args()
 
     separator = ''
@@ -277,8 +276,8 @@ if __name__ == '__main__':
     if args.tests:
         cppunitdir = path.join(workdir, '.depend', 'cppunit')
         print(separator)
-        #git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)   # git server is unreliable lately
-        download_cppunit(cppunitdir)
+        git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)   # git server is unreliable lately
+        # download_cppunit(cppunitdir)
         print(separator)
         build_cppunit(args.compiler, args.arch, cppunitdir)
 

@@ -54,6 +54,14 @@
 
 #include "md5.h"
 
+#if _MSC_VER >= 1900
+/* [marius]
+   Disable optimizations in md5_memcpy
+   The compiler will replace the `for` loop with `_memcpy` which is missing in /NODEFAULTLIBS builds
+*/
+#pragma optimize("", off)
+#endif
+
 void md5_memcpy( void *dest, const void *src, int count ) {
   md5_byte_t* bDest = (md5_byte_t*)dest;
   md5_byte_t* bSrc = (md5_byte_t*)src;
@@ -62,6 +70,10 @@ void md5_memcpy( void *dest, const void *src, int count ) {
     bDest[i] = bSrc[i];
   }
 }
+
+#if _MSC_VER >= 1900
+#pragma optimize("", on)
+#endif
 
 #undef BYTE_ORDER	/* 1 = big-endian, -1 = little-endian, 0 = unknown */
 #ifdef ARCH_IS_BIG_ENDIAN
