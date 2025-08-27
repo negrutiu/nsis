@@ -20,8 +20,8 @@ def merge_nsis_distros(distro_x86_dir, distro_amd64_dir, windows_x86_dir=None, w
     Share files (stubs, plugins, etc.) between x86 and amd64 NSIS distribution directories.
 
     Arguments:
-    - distro_x86_dir:     x86 distribution directory, usually `.instdist-ubuntu-x86`
-    - distro_amd64_dir:   amd64 distribution directory, usually `.instdist-ubuntu-amd64`
+    - distro_x86_dir:     main x86 distribution directory, usually `.instdist-final-x86`
+    - distro_amd64_dir:   main amd64 distribution directory, usually `.instdist-final-amd64`
     - windows_x86_dir:    Windows distribution directory, usually `.instdist-windows-x86`
     - windows_amd64_dir:  Windows distribution directory, usually `.instdist-windows-amd64`
     """
@@ -31,12 +31,12 @@ def merge_nsis_distros(distro_x86_dir, distro_amd64_dir, windows_x86_dir=None, w
         # copy Bin\makensisw.exe to root
         [path.join(distro_x86_dir,    'Bin'), r'makensisw\.exe', distro_x86_dir],
         [path.join(distro_amd64_dir,  'Bin'), r'makensisw\.exe', distro_amd64_dir],
-        # copy missing root *.exe and *.chm from windows to ubuntu
+        # copy missing root *.exe and *.chm from windows to main distro
         [windows_x86_dir,   r'^.*\.exe$', distro_x86_dir]   if windows_x86_dir else [None, None, None],
         [windows_x86_dir,   r'^.*\.chm$', distro_x86_dir]   if windows_x86_dir else [None, None, None],
         [windows_amd64_dir, r'^.*\.exe$', distro_amd64_dir] if windows_amd64_dir else [None, None, None],
         [windows_amd64_dir, r'^.*\.chm$', distro_amd64_dir] if windows_amd64_dir else [None, None, None],
-        # copy missing Bin\*.exe from windows to ubuntu
+        # copy missing Bin\*.exe from windows to main distro
         [path.join(windows_x86_dir,   'Bin'), r'^.*\.exe$', path.join(distro_x86_dir,   'Bin')] if windows_x86_dir   else [None, None, None],
         [path.join(windows_amd64_dir, 'Bin'), r'^.*\.exe$', path.join(distro_amd64_dir, 'Bin')] if windows_amd64_dir else [None, None, None],
         # merge x86 and amd64 plugins
@@ -65,10 +65,14 @@ def merge_nsis_distros(distro_x86_dir, distro_amd64_dir, windows_x86_dir=None, w
 
 def build_nsis_package(
         artifacts_dir,
-        distro_x86_dir='.instdist-ubuntu-x86',
-        distro_amd64_dir='.instdist-ubuntu-amd64',
+        distro_x86_dir='.instdist-final-x86',
+        distro_amd64_dir='.instdist-final-amd64',
         windows_x86_dir='.instdist-windows-x86',
-        windows_amd64_dir='.instdist-windows-amd64'
+        windows_amd64_dir='.instdist-windows-amd64',
+        distro_x86_re=r'^.+-ubuntu-[\w\.]+-x86-gcc$',
+        distro_amd64_re=r'^.+-ubuntu-[\w\.]+-amd64-gcc$',
+        windows_x86_re=r'^.+-windows-[\w\.]+-x86-gcc$',
+        windows_amd64_re=r'^.+-windows-[\w\.]+-amd64-gcc$'
         ):
     """ Build x86 and amd64 NSIS distribution packages from `GitHub Actions` artifacts. """
     artifacts_dir = path.abspath(artifacts_dir)
@@ -91,10 +95,10 @@ def build_nsis_package(
 
             outdir = None
             for srcre, dstdir in [
-                [r'^.+-ubuntu-[\w\.]+-x86-gcc$',    distro_x86_dir],
-                [r'^.+-ubuntu-[\w\.]+-amd64-gcc$',  distro_amd64_dir],
-                [r'^.+-windows-[\w\.]+-x86-gcc$',   windows_x86_dir],
-                [r'^.+-windows-[\w\.]+-amd64-gcc$', windows_amd64_dir]
+                [distro_x86_re,    distro_x86_dir],
+                [distro_amd64_re,  distro_amd64_dir],
+                [windows_x86_re,   windows_x86_dir],
+                [windows_amd64_re, windows_amd64_dir]
                 ]:
                 if re.match(srcre, dir):
                     outdir = dstdir
@@ -169,4 +173,4 @@ if __name__ == '__main__':
 
     for arch in ['x86', 'amd64']:
         print("\n--------------------------------------------------------------------------------\n")
-        build_nsis_installer(f'.instdist-ubuntu-{arch}', arch, build_number=args.build_number, verbose_level=3)
+        build_nsis_installer(f'.instdist-final-{arch}', arch, build_number=args.build_number, verbose_level=3)
