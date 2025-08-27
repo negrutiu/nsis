@@ -98,6 +98,14 @@ jobs:
             update: true
             install: mingw-w64-x86_64-toolchain
 
+      - name: Disable standalone mingw
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
+        shell: python
+        run: |
+          import os
+          os.rename('C:\\mingw32', 'C:\\mingw32.bak')
+          os.rename('C:\\mingw64', 'C:\\mingw64.bak')
+            
       # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
       - name: Checkout
         uses: actions/checkout@v4
