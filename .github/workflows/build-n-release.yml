@@ -213,7 +213,7 @@ jobs:
   package:
     name: Package
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: windows-latest
     steps:
 
     # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
@@ -234,7 +234,13 @@ jobs:
         from nsis_package import *
         # ----- nsis_package.py -----
         # blend x86 and amd64 artifacts together
-        build_nsis_package('artifacts', distro_x86_dir='.instdist-final-x86', distro_amd64_dir='.instdist-final-amd64')
+        build_nsis_package(
+          'artifacts',
+          distro_x86_dir='.instdist-x86',
+          distro_amd64_dir='.instdist-amd64',
+          distro_x86_re=r'^.+-windows-[\w\.]+-x86-gcc$',
+          distro_amd64_re=r'^.+-windows-[\w\.]+-amd64-gcc$'
+          )
 
     - name: Build NSIS Setup (x86)
       shell: python
@@ -243,7 +249,7 @@ jobs:
         sys.path.insert(0, r'${{github.workspace}}')
         from nsis_package import *
         # ----- nsis_package.py -----
-        build_nsis_installer('.instdist-final-x86', 'x86', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
+        build_nsis_installer('.instdist-x86', 'x86', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
 
     - name: Build NSIS Setup (amd64)
       shell: python
@@ -252,20 +258,20 @@ jobs:
         sys.path.insert(0, r'${{github.workspace}}')
         from nsis_package import *
         # ----- nsis_package.py -----
-        build_nsis_installer('.instdist-final-amd64', 'amd64', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
+        build_nsis_installer('.instdist-amd64', 'amd64', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
 
     - name: Upload NSIS Setup (x86)
       uses: actions/upload-artifact@v4
       with:
         name: nsis-x86-setup
-        path: .instdist-final-x86/nsis*-x86.exe
+        path: .instdist-x86/nsis*-x86.exe
         include-hidden-files: true    # https://github.com/actions/upload-artifact/issues/618
 
     - name: Upload NSIS Setup (amd64)
       uses: actions/upload-artifact@v4
       with:
         name: nsis-amd64-setup
-        path: .instdist-final-amd64/nsis*-amd64.exe
+        path: .instdist-amd64/nsis*-amd64.exe
         include-hidden-files: true    # https://github.com/actions/upload-artifact/issues/618
   
   # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
