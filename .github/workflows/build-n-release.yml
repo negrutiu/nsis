@@ -222,7 +222,7 @@ jobs:
   package:
     name: Package
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: windows-latest
     steps:
 
     # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
@@ -247,6 +247,8 @@ jobs:
           'artifacts',
           distro_x86_dir='.instdist-x86',
           distro_amd64_dir='.instdist-amd64',
+          distro_x86_re=r'^.+-windows-[\w\.]+-x86-gcc$',
+          distro_amd64_re=r'^.+-windows-[\w\.]+-amd64-gcc$'
           )
 
     - name: Build NSIS setup (x86)
