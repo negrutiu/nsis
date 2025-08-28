@@ -68,11 +68,11 @@ jobs:
           py -0p
           pip list
 
-      - name: Upgrade msys2/mingw64
+      - name: Upgrade msys2
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
         uses: msys2/setup-msys2@v2
         with:
-          msystem: mingw64
+          msystem: msys
           release: false
           update: true
           install: >-
@@ -80,6 +80,32 @@ jobs:
             autoconf-wrapper
             automake-wrapper
   
+      - name: Upgrade msys2/mingw32
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'x86'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: msys
+          release: false
+          update: true
+          install: mingw-w64-i686-toolchain
+          
+      - name: Upgrade msys2/mingw64
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'amd64'
+        uses: msys2/setup-msys2@v2
+        with:
+            msystem: msys
+            release: false
+            update: true
+            install: mingw-w64-x86_64-toolchain
+
+      - name: Disable standalone mingw
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
+        shell: python
+        run: |
+          import os
+          os.rename('C:\\mingw32', 'C:\\mingw32.bak')
+          os.rename('C:\\mingw64', 'C:\\mingw64.bak')
+            
       # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
       - name: Checkout
         uses: actions/checkout@v4
