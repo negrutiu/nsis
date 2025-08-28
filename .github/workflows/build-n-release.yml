@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest]   # nothing works on macos-latest (`cppunit` fails to build. `zlib` not found)
+        os: [ubuntu-22.04, windows-latest, macos-15, macos-latest]
         arch: [x86, amd64]
         compiler: [gcc]
         include:
