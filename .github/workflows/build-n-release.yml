@@ -106,6 +106,37 @@ jobs:
           os.rename('C:\\mingw32', 'C:\\mingw32.bak')
           os.rename('C:\\mingw64', 'C:\\mingw64.bak')
             
+      - name: Debug MacOS
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            ls -la /usr/bin/i686* || echo "no /usr/bin/i686* files"
+            echo ------------------------------------------------------------
+            ls -la /usr/bin/x86_64* || echo "no /usr/bin/x86_64* files"
+            echo ------------------------------------------------------------
+            ls -la /usr/bin/*-13 || echo "no /usr/bin/*-13 files"
+            ls -la /usr/local/bin/*-13 || echo "no /usr/local/bin/*-13 files"
+            echo ------------------------------------------------------------
+            ls -la /usr/local/Cellar/gcc@13/13.3.0/bin/* || echo "/usr/local/Cellar/gcc@13/13.3.0/bin/* files"
+            echo ------------------------------------------------------------
+            ls -la /opt/homebrew/bin/i686* || echo "no /opt/homebrew/bin/i686* files"
+            echo ------------------------------------------------------------
+            ls -la /opt/homebrew/bin/x86_64* || echo "no /opt/homebrew/bin/x86_64* files"
+            echo ------------------------------------------------------------
+            for compiler in cc c++ gcc g++ gcc-13 g++-13 gcc-14 g++-14 gcc-15 g++-15 clang clang++
+            do
+              echo -- $compiler --------------------------------------------------------
+              which $compiler
+              $compiler --version
+            done
+
+      - name: Debug Python
+        shell: python
+        run: |
+          import os, sys
+          print(f'-- os.name = {os.name}')
+          print(f'-- sys.platform = {sys.platform}')
+          print(f'-- sys.version = {sys.version}')
+            
       # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
       - name: Checkout
         uses: actions/checkout@v4
@@ -153,29 +184,6 @@ jobs:
           zlibdir = os.path.join(r'${{github.workspace}}', 'zlib')
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
           build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
-
-      - name: Debug MacOS
-        if: startsWith(matrix.os, 'macos')
-        run: |
-            ls -la /usr/bin/i686* || echo "no /usr/bin/i686* files"
-            echo ------------------------------------------------------------
-            ls -la /usr/bin/x86_64* || echo "no /usr/bin/x86_64* files"
-            echo ------------------------------------------------------------
-            ls -la /usr/bin/*-13 || echo "no /usr/bin/*-13 files"
-            ls -la /usr/local/bin/*-13 || echo "no /usr/local/bin/*-13 files"
-            echo ------------------------------------------------------------
-            ls -la /usr/local/Cellar/gcc@13/13.3.0/bin/* || echo "/usr/local/Cellar/gcc@13/13.3.0/bin/* files"
-            echo ------------------------------------------------------------
-            ls -la /opt/homebrew/bin/i686* || echo "no /opt/homebrew/bin/i686* files"
-            echo ------------------------------------------------------------
-            ls -la /opt/homebrew/bin/x86_64* || echo "no /opt/homebrew/bin/x86_64* files"
-            echo ------------------------------------------------------------
-            for compiler in cc c++ gcc g++ gcc-13 g++-13 gcc-14 g++-14 gcc-15 g++-15 clang clang++
-            do
-              echo -- $compiler --------------------------------------------------------
-              which $compiler
-              $compiler --version
-            done
 
       - name: CppUnit Checkout & Build
         shell: python
