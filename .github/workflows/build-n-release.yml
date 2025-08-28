@@ -98,22 +98,6 @@ jobs:
             update: true
             install: mingw-w64-x86_64-toolchain
 
-      - name: Upgrade ubuntu/mingw32
-        if: startsWith(matrix.os, 'ubuntu') && matrix.arch == 'x86'
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x86
-          static: 1
-          #version: 15.0
-
-      - name: Upgrade ubuntu/mingw64
-        if: startsWith(matrix.os, 'ubuntu') && matrix.arch == 'amd64'
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
-          static: 1
-          #version: 15.0
-
       - name: Disable standalone mingw
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
         shell: python
