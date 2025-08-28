@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest]   # nothing works on macos-latest (`cppunit` fails to build. `zlib` not found)
+        os: [ubuntu-22.04, windows-latest, macos-15, macos-latest]
         arch: [x86, amd64]
         compiler: [gcc]
         include:
@@ -170,7 +170,7 @@ jobs:
             echo ------------------------------------------------------------
             ls -la /opt/homebrew/bin/x86_64* || echo "no /opt/homebrew/bin/x86_64* files"
             echo ------------------------------------------------------------
-            for compiler in cc c++ gcc g++ gcc-13 g++-13 clang clang++
+            for compiler in cc c++ gcc g++ gcc-13 g++-13 gcc-14 g++-14 gcc-15 g++-15 clang clang++
             do
               echo -- $compiler --------------------------------------------------------
               which $compiler
