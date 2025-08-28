@@ -140,11 +140,22 @@ def git_checkout(url, dir, depth = 1):
 
 
 def build_zlib(compiler, arch, zlibdir):
+    ''' Build `zlib` library for the **target platform** (Windows). The output is `zlib1.dll` in `zlibdir`. '''
     compiler, arch, vars = setup_environ(compiler, arch)
     curdir = path.curdir
     os.chdir(zlibdir)
     if compiler == 'gcc' and os.name == 'nt':
         args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
+    elif compiler == 'gcc' and sys.platform == 'darwin':
+        # /opt/homebrew/bin/i686-w64-mingw32-gcc-15.2.0
+        # /opt/homebrew/bin/x86_64-w64-mingw32-gcc-15.2.0
+        # todo: detect dynamically
+        prefix = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
+        if os.path.exists('/opt/homebrew/bin/i686-w64-mingw32-gcc-15.2.0'):
+            suffix = '-15.2.0'
+        elif os.path.exists('/opt/homebrew/bin/i686-w64-mingw32-gcc-15.1.0'):
+            suffix = '-15.1.0'
+        args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefix[arch]}', f'CC={prefix[arch]}gcc{suffix}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
     elif compiler == 'gcc' and os.name != 'nt':
         prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
         args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
