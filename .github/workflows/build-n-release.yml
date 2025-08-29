@@ -41,11 +41,12 @@ jobs:
       - name: Install dependencies (macos)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install scons mingw-w64 libtool autoconf automake
+          brew update
+          brew install libtool autoconf automake mingw-w64 scons zlib cppunit
 
       - name: Install dependencies (ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y scons mingw-w64
+        run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y scons mingw-w64 zlib1g-dev libcppunit-dev
 
       - name: Upgrade python (windows)
         if: startsWith(matrix.os, 'windows')
@@ -127,7 +128,7 @@ jobs:
               ls -Rla "$dir"
             done
 
-            for compiler in cc c++ gcc g++ gcc-13 g++-13 clang clang++
+            for compiler in cc c++ gcc g++ gcc-13 g++-13 gcc-14 g++-14 gcc-15 g++-15 clang clang++
             do
               echo -- $compiler --------------------------------------------------------
               which $compiler
@@ -182,7 +183,21 @@ jobs:
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
           build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
 
-      - name: Build cppunit
+      # - name: Build zlib (macos)
+      #   if: startsWith(matrix.os, 'macos')
+      #   shell: python
+      #   working-directory: nsis
+      #   run: |
+      #     import sys, os
+      #     sys.path.insert(0, os.path.join(r'${{github.workspace}}', r'nsis'))
+      #     from nsis_build import *
+      #     # ----- nsis_build.py -----
+      #     zlibdir = os.path.join(r'${{github.workspace}}', 'zlib_posix')
+      #     git_checkout('https://github.com/madler/zlib.git', zlibdir)
+      #     build_zlib_posix(r'${{matrix.arch}}', zlibdir)
+
+      - name: Build cppunit (windows)
+        if: startsWith(matrix.os, 'windows')
         shell: python
         working-directory: nsis
         run: |
@@ -208,7 +223,7 @@ jobs:
             from nsis_build import *
             # ----- nsis_build.py -----
             zlibdir = os.path.join(r'${{github.workspace}}', 'zlib')
-            cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
+            cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit') if os.name == 'nt' else None
             build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist-zip'])
 
       - name: Upload artifacts
