@@ -166,6 +166,7 @@ def build_zlib(compiler, arch, zlibdir):
 
 
 def build_cppunit(compiler, arch, cppunitdir):
+    ''' Build `cppunit` library for the **host platform** (Windows/Linux/Mac). '''
     if path.exists(path.join(cppunitdir, 'bin', 'DllPlugInTester.exe')) or path.exists(path.join(cppunitdir, 'lib', 'DllPlugInTester_dll.exe')):
         print("cppunit already built.")
         return
@@ -174,14 +175,14 @@ def build_cppunit(compiler, arch, cppunitdir):
     os.chdir(cppunitdir)
     if compiler == 'gcc':
         prefix = 'mingw32-' if os.name == 'nt' else ''
-        outargs = [
+        moreargs = [
             rf"--prefix={win_to_posix(path.join(cppunitdir, 'installed'))}",
             rf'--libdir={win_to_posix(path.join(cppunitdir, "lib"))}',
             rf"--bindir={win_to_posix(path.join(cppunitdir, 'bin'))}"
             ]
         for args in [
             ['sh', './autogen.sh'],
-            ['sh', './configure', f'MAKE={prefix}make'] + outargs + ['LDFLAGS=-static', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
+            ['sh', './configure', f'MAKE={prefix}make'] + moreargs + ['LDFLAGS=-static', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
             [f'{prefix}make'],
             [f'{prefix}make', 'install']
             ]:
@@ -238,6 +239,15 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
             f'NSIS_CONFIG_LOG={"Yes" if nsislog else "No"}',
             f'NSIS_CONFIG_LOG_TIMESTAMP={"Yes" if nsislog else "No"}',
             f'NSIS_MAX_STRLEN={nsismaxstrlen}']
+
+    if sys.platform == 'darwin':
+        prefix = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
+        suffix = ''
+        # if os.path.exists('/opt/homebrew/bin/i686-w64-mingw32-gcc-15.2.0'):
+        #     suffix = '-15.2.0'
+        # elif os.path.exists('/opt/homebrew/bin/i686-w64-mingw32-gcc-15.1.0'):
+        #     suffix = '-15.1.0'
+        args += [f'CC={prefix[arch]}gcc{suffix}', f'CXX={prefix[arch]}g++{suffix}']
 
     if compiler == 'gcc' and os.name == 'nt':
         args += ['TOOLSET=gcc,gnulink,mingw']   # use mingw toolset in Windows
