@@ -183,8 +183,8 @@ opts.Add(EnumVariable('TARGET_ARCH', 'Target processor architecture', 'x86', all
 opts.Add(ListVariable('DOCTYPES', 'A list of document types that will be built', default_doctype, doctypes))
 opts.Add(('CC', 'Override C compiler', None))
 opts.Add(('CXX', 'Override C++ compiler', None))
-opts.Add(PathVariable('APPEND_CPPPATH', 'Additional paths to search for include files', None))
-opts.Add(PathVariable('APPEND_LIBPATH', 'Additional paths to search for libraries', None))
+opts.Add(('APPEND_CPPPATH', 'Additional paths to search for include files, delimited by whitespaces', None))
+opts.Add(('APPEND_LIBPATH', 'Additional paths to search for libraries, delimited by whitespaces', None))
 opts.Add(('APPEND_CCFLAGS', 'Additional C/C++ compiler flags'))
 opts.Add(('APPEND_LINKFLAGS', 'Additional linker flags'))
 opts.Add(PathVariable('WXWIN', 'Path to wxWindows library folder (e.g. C:\\Dev\\wxWidgets-2.8.10)', os.environ.get('WXWIN')))
@@ -550,8 +550,10 @@ if defenv['MSTOOLKIT']:
 
 defenv.Append(CCFLAGS = Split('$APPEND_CCFLAGS'))
 defenv.Append(LINKFLAGS = Split('$APPEND_LINKFLAGS'))
-defenv.Append(CPPPATH = Split('$APPEND_CPPPATH'))
-defenv.Append(LIBPATH = Split('$APPEND_LIBPATH'))
+if 'APPEND_CPPPATH' in defenv:
+	defenv.Append(CPPPATH = defenv['APPEND_CPPPATH'].split())
+if 'APPEND_LIBPATH' in defenv:
+	defenv.Append(LIBPATH = defenv['APPEND_LIBPATH'].split())
 
 defenv.Default('$BUILD_PREFIX')
 
@@ -587,12 +589,17 @@ if 'ZLIB_W32' in defenv:
 			defenv[key] = os.path.join(os.path.abspath(os.curdir), defenv[key])
 
 	for name, value in defenv._dict.items():
-		if name.find('ZLIB') != -1 or name.find('APPEND') != -1:
+		if name in ['ZLIB', 'APPEND']:
 			print(f"-- {name} = ({type(value)}){value}")
 	for p in os.environ['PATH'].split(os.pathsep):
 		print(f"-- PATH = {p}")
 
 tools = defenv['TOOLS']
+
+if 'CPPPATH' in defenv:
+	print(f"-- CPPPATH = {defenv['CPPPATH']}")
+if 'LIBPATH' in defenv:
+	print(f"-- LIBPATH = {defenv['LIBPATH']}")
 
 envs = []
 
