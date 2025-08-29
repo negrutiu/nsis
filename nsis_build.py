@@ -2,6 +2,7 @@ from os import path
 import os, sys, shutil, json
 from subprocess import Popen, PIPE
 from nsis_version import *
+import glob, re
 
 # requirements:
 # pacman -S mingw-w64-i686-toolchain
@@ -140,6 +141,20 @@ def git_checkout(url, dir, depth = 1):
     os.chdir(curdir)
 
 
+# def build_zlib_posix(arch, zlibdir):
+#     ''' Build `zlib` library for the **host platform**. '''
+#     curdir = path.curdir
+#     os.chdir(zlibdir)
+#     run(['sh', 'configure', '--static'] + (['--64'] if arch == 'amd64' else []))
+#     run(['make'])
+#     os.chdir(curdir)
+#     for item in glob.iglob('**', root_dir=zlibdir, recursive=False):
+#         if re.match(r'.*\.h$', item):
+#             print(f'-- {item}')
+#         elif re.match(r'.*\.a$', item):
+#             print(f'== {item}')
+#     run(['gcc', '--version'])
+
 def build_zlib(compiler, arch, zlibdir):
     ''' Build `zlib` library for the **target platform** (Windows). The output is `zlib1.dll` in `zlibdir`. '''
     compiler, arch, vars = setup_environ(compiler, arch)
@@ -167,6 +182,7 @@ def build_zlib(compiler, arch, zlibdir):
 
 
 def build_cppunit(compiler, arch, cppunitdir):
+    ''' Build `cppunit` library for the **host platform** (Windows/Linux/Mac). '''
     if path.exists(path.join(cppunitdir, 'bin', 'DllPlugInTester.exe')) or path.exists(path.join(cppunitdir, 'lib', 'DllPlugInTester_dll.exe')):
         print("cppunit already built.")
         return
@@ -228,6 +244,8 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
             validate_compatibility_with_htmlhelp(path.dirname(__file__))
 
     args = [f'scons',
+            # f'--debug=explain',
+            f'VERBOSE=1',
             f'TARGET_ARCH={arch}',
             f'ZLIB_W32={zlibdir}',
             f'VERSION={nsis_version(build_number=build_number)}',
@@ -243,6 +261,50 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
             f'NSIS_CONFIG_LOG_TIMESTAMP={"Yes" if nsislog else "No"}',
             f'NSIS_MAX_STRLEN={nsismaxstrlen}']
 
+    append_delim = ' '
+    append_cpppath = ''
+    append_libpath = ''
+    if sys.platform == 'darwin':
+        # /opt/homebrew/bin/i686-w64-mingw32-gcc-15.2.0
+        # /opt/homebrew/bin/x86_64-w64-mingw32-gcc-15.2.0
+        #gcc_arch = 'i686' if arch == 'x86' else 'x86_64'
+        ### for fn in glob.iglob(f'{gcc_arch}-w64-mingw32-gcc-15*', root_dir='/opt/homebrew/bin'):
+        ###     args += [f'CC=/opt/homebrew/bin/{fn}']
+        ###     break
+        ### for fn in glob.iglob(f'{gcc_arch}-w64-mingw32-g++-15*', root_dir='/opt/homebrew/bin'):
+        ###     args += [f'CXX=/opt/homebrew/bin/{fn}']
+        ###     break
+        #args += [f'CC={gcc_arch}-w64-mingw32-gcc', f'CXX={gcc_arch}-w64-mingw32-g++']
+        append_cpppath += append_delim + '/opt/homebrew/opt/cppunit/include'
+        append_libpath += append_delim + '/opt/homebrew/opt/cppunit/lib'
+        # if os.path.exists(dir := '/Users/runner/work/nsis/nsis/zlib_posix'):
+        #     append_cpppath += append_delim + dir
+        #     append_libpath += append_delim + dir
+        append_cpppath += append_delim + '/opt/homebrew/opt/zlib/include'
+        append_libpath += append_delim + '/opt/homebrew/opt/zlib/lib'
+
+    if compiler == 'gcc' and sys.platform == 'darwin':
+        mingw_arch = 'i686' if arch == 'x86' else 'x86_64'  # i686, x86_64
+        try:
+            gcc = f'/opt/homebrew/bin/{mingw_arch}-w64-mingw32-gcc'
+            mingw_root = os.readlink(gcc)                               # /opt/homebrew/bin/x86_64-w64-mingw32-g++ -> ../Cellar/mingw-w64/13.0.0_1/bin/x86_64-w64-mingw32-g++
+            mingw_root = os.path.normpath(os.path.join(os.path.dirname(gcc), mingw_root))    # /opt/homebrew/Cellar/mingw-w64/13.0.0_1/bin/x86_64-w64-mingw32-g++
+            mingw_root = os.path.dirname(os.path.dirname(mingw_root))         # /opt/homebrew/Cellar/mingw-w64/13.0.0_1
+            mingw_root = os.path.join(mingw_root, f'toolchain-{mingw_arch}/{mingw_arch}-w64-mingw32')    #
+            # for entry in glob.glob('**', root_dir=mingw_root, recursive=True, include_hidden=True):
+            #     if os.path.isdir(dir := os.path.join(mingw_root, entry)):
+            #         print(f'{dir}/')
+            #     elif re.match(r'.*windows\.h$', entry):
+            #         print(f'  {os.path.join(mingw_root, entry)}')
+            #     elif re.match(r'.*libuser32\.a$', entry):
+            #         print(f'  {os.path.join(mingw_root, entry)}')
+            if os.path.exists(dir := path.join(mingw_root, 'include')):
+                append_cpppath += append_delim + dir
+            if os.path.exists(dir := path.join(mingw_root, 'lib')):
+                append_libpath += append_delim + dir
+        except OSError as ex:
+            print(f"-- note: failed to read 'gcc' target: {ex}")
+
     if compiler == 'gcc' and os.name == 'nt':
         args += ['TOOLSET=gcc,gnulink,mingw']   # use mingw toolset in Windows
 
@@ -257,6 +319,11 @@ def build_nsis_distro(compiler, arch, build_number, zlibdir, cppunitdir=None, ns
     if cppunitdir is not None and 'test' in actions:
         args += [f'APPEND_CPPPATH={path.join(cppunitdir, "include")}',
                  f'APPEND_LIBPATH={path.join(cppunitdir, "lib")}']
+
+    if append_cpppath != '':
+        args += [f'APPEND_CPPPATH={append_cpppath}']
+    if append_libpath != '':
+        args += [f'APPEND_LIBPATH={append_libpath}']
 
     args += actions
 
