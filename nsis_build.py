@@ -187,16 +187,17 @@ def download_cppunit(cppunitdir):
         version = '1.15.1'
         url = f'https://dev-www.libreoffice.org/src/cppunit-{version}.tar.gz'
         tgz = f'{cppunitdir}-{version}.tar.gz'
-        print(f'downloading {url} -> {tgz} ...')
+        print(f'downloading {url}')
         from urllib import request
         with request.urlopen(url) as http:
             with open(tgz, 'wb') as fout:
                 fout.write(http.read())
-        print('extracting ...')
+        print(f'extracting {tgz}')
         import tarfile
         with tarfile.open(tgz) as tf:
             memberlist = [m for m in tf.getmembers() if m.name.startswith(f'cppunit-{version}')]
             tf.extractall(path.dirname(cppunitdir), memberlist, numeric_owner=True, filter='data')
+        print('rename "' + f'cppunit-{version}' + f'" -> "{cppunitdir}"')
         os.rename(path.join(path.dirname(cppunitdir), f'cppunit-{version}'), cppunitdir)
 
 

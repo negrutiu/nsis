@@ -186,8 +186,12 @@ jobs:
             from nsis_build import *
             # ----- nsis_build.py -----
             cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
-            git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)   # git server is sometimes down
-            # download_cppunit(cppunitdir)     # webserver is sometimes down
+            try:
+              # git server sometimes times out
+              git_checkout('git://anongit.freedesktop.org/git/libreoffice/cppunit', cppunitdir)
+            except:
+              # fallback to mirror server
+              download_cppunit(cppunitdir)
             build_cppunit(r'${{matrix.compiler}}', r'${{matrix.arch}}', cppunitdir)
 
       - name: Build NSIS
