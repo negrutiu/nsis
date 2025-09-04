@@ -38,22 +38,22 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
 
-      - name: Brew Dependencies
+      - name: Install dependencies (macos)
         if: startsWith(matrix.os, 'macos')
         run: |
           brew install scons mingw-w64 libtool autoconf automake
 
-      - name: Apt Dependencies
+      - name: Install dependencies (ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y scons mingw-w64
 
-      - name: Setup Python
+      - name: Upgrade python (windows)
         if: startsWith(matrix.os, 'windows')
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      - name: Windows Dependencies
+      - name: Install dependencies (windows)
         if: startsWith(matrix.os, 'windows')
         run: |
           # install scons excluding build 4.8.0 (https://github.com/SCons/scons/issues/4585)
@@ -68,7 +68,7 @@ jobs:
           py -0p
           pip list
 
-      - name: Upgrade msys2
+      - name: Upgrade msys2 (windows, gcc)
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
         uses: msys2/setup-msys2@v2
         with:
@@ -80,7 +80,7 @@ jobs:
             autoconf-wrapper
             automake-wrapper
   
-      - name: Upgrade msys2/mingw32
+      - name: Upgrade msys2/mingw32 (windows, gcc)
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'x86'
         uses: msys2/setup-msys2@v2
         with:
@@ -89,7 +89,7 @@ jobs:
           update: true
           install: mingw-w64-i686-toolchain
           
-      - name: Upgrade msys2/mingw64
+      - name: Upgrade msys2/mingw64 (windows, gcc)
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'amd64'
         uses: msys2/setup-msys2@v2
         with:
@@ -98,16 +98,44 @@ jobs:
             update: true
             install: mingw-w64-x86_64-toolchain
 
-      - name: Disable standalone mingw
+      - name: Disable standalone mingw (windows, gcc)
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
         shell: python
         run: |
+          # the msys2 distribution of mingw-w64 is usually newer than the standalone one
+          # we'll disable the standalone one and let the build scripts find the msys2 one
           import os
           os.rename('C:\\mingw32', 'C:\\mingw32.bak')
           os.rename('C:\\mingw64', 'C:\\mingw64.bak')
             
+      - name: Print debug info (macos)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            find /opt/homebrew/Cellar/mingw-w64 -type d || echo "no /opt/homebrew/Cellar/mingw-w64 files"
+            echo ------------------------------------------------------------
+            ls -la /opt/homebrew/bin/i686* || echo "no /opt/homebrew/bin/i686* files"
+            echo ------------------------------------------------------------
+            ls -la /opt/homebrew/bin/x86_64* || echo "no /opt/homebrew/bin/x86_64* files"
+            echo ------------------------------------------------------------
+            ls -la /opt/homebrew/bin/g*
+            echo ------------------------------------------------------------
+            ls -la /usr/bin/g*
+
+            for dir in "$(brew --prefix zlib)/include" "$(brew --prefix zlib)/lib" "$(brew --prefix cppunit)/include" "$(brew --prefix cppunit)/lib"
+            do
+              echo ---------- $dir
+              ls -Rla "$dir"
+            done
+
+            for compiler in cc c++ gcc g++ gcc-13 g++-13 clang clang++
+            do
+              echo -- $compiler --------------------------------------------------------
+              which $compiler
+              $compiler --version
+            done
+
       # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
-      - name: Checkout
+      - name: Checkout the project
         uses: actions/checkout@v4
         with:
           path: nsis
@@ -142,7 +170,7 @@ jobs:
             fout.write(f"version_revision={version_revision}\n")
             fout.write(f"version_build={version_build}\n")
 
-      - name: Zlib Checkout & Build
+      - name: Build zlib
         shell: python
         working-directory: nsis
         run: |
@@ -154,30 +182,7 @@ jobs:
           git_checkout('https://github.com/madler/zlib.git', zlibdir)
           build_zlib(r'${{matrix.compiler}}', r'${{matrix.arch}}', zlibdir)
 
-      - name: Debug MacOS
-        if: startsWith(matrix.os, 'macos')
-        run: |
-            ls -la /usr/bin/i686* || echo "no /usr/bin/i686* files"
-            echo ------------------------------------------------------------
-            ls -la /usr/bin/x86_64* || echo "no /usr/bin/x86_64* files"
-            echo ------------------------------------------------------------
-            ls -la /usr/bin/*-13 || echo "no /usr/bin/*-13 files"
-            ls -la /usr/local/bin/*-13 || echo "no /usr/local/bin/*-13 files"
-            echo ------------------------------------------------------------
-            ls -la /usr/local/Cellar/gcc@13/13.3.0/bin/* || echo "/usr/local/Cellar/gcc@13/13.3.0/bin/* files"
-            echo ------------------------------------------------------------
-            ls -la /opt/homebrew/bin/i686* || echo "no /opt/homebrew/bin/i686* files"
-            echo ------------------------------------------------------------
-            ls -la /opt/homebrew/bin/x86_64* || echo "no /opt/homebrew/bin/x86_64* files"
-            echo ------------------------------------------------------------
-            for compiler in cc c++ gcc g++ gcc-13 g++-13 clang clang++
-            do
-              echo -- $compiler --------------------------------------------------------
-              which $compiler
-              $compiler --version
-            done
-
-      - name: CppUnit Checkout & Build
+      - name: Build cppunit
         shell: python
         working-directory: nsis
         run: |
@@ -206,7 +211,7 @@ jobs:
             cppunitdir = os.path.join(r'${{github.workspace}}', 'cppunit')
             build_nsis_distro(r'${{matrix.compiler}}', r'${{matrix.arch}}', ${{github.run_number}}, zlibdir, cppunitdir, nsislog=True, nsismaxstrlen=4096, actions=['test', 'dist-zip'])
 
-      - name: Upload Artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-${{matrix.os}}-${{matrix.arch}}-${{matrix.compiler}}
@@ -221,16 +226,16 @@ jobs:
     steps:
 
     # `fetch-depth: 0` pulls full branch history. Needed to extract the SVN revision number from git comments
-    - name: Checkout
+    - name: Checkout the project
       uses: actions/checkout@v4
 
-    - name: Download Artifacts
+    - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
         path: artifacts
         pattern: artifacts-*
 
-    - name: Merge Architectures
+    - name: Merge architectures
       shell: python
       run: |
         import sys, os
@@ -244,7 +249,7 @@ jobs:
           distro_amd64_dir='.instdist-amd64',
           )
 
-    - name: Build NSIS Setup (x86)
+    - name: Build NSIS setup (x86)
       shell: python
       run: |
         import sys, os
@@ -253,7 +258,7 @@ jobs:
         # ----- nsis_package.py -----
         build_nsis_installer('.instdist-x86', 'x86', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
 
-    - name: Build NSIS Setup (amd64)
+    - name: Build NSIS setup (amd64)
       shell: python
       run: |
         import sys, os
@@ -262,14 +267,14 @@ jobs:
         # ----- nsis_package.py -----
         build_nsis_installer('.instdist-amd64', 'amd64', ${{needs.build.outputs.version_major}}, ${{needs.build.outputs.version_minor}}, ${{needs.build.outputs.version_revision}}, ${{needs.build.outputs.version_build}})
 
-    - name: Upload NSIS Setup (x86)
+    - name: Upload NSIS setup (x86)
       uses: actions/upload-artifact@v4
       with:
         name: nsis-x86-setup
         path: .instdist-x86/nsis*-x86.exe
         include-hidden-files: true    # https://github.com/actions/upload-artifact/issues/618
 
-    - name: Upload NSIS Setup (amd64)
+    - name: Upload NSIS setup (amd64)
       uses: actions/upload-artifact@v4
       with:
         name: nsis-amd64-setup
@@ -287,7 +292,7 @@ jobs:
       contents: write
       
     steps:
-      - name: Checkout
+      - name: Checkout the project
         uses: actions/checkout@v4
         
       - name: Download NSIS
@@ -297,7 +302,7 @@ jobs:
           pattern: nsis-*-setup
           merge-multiple: true
       
-      - name: Prepare release notes
+      - name: Redact release notes
         shell: python
         run: |
           lines = []
