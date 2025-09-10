@@ -297,4 +297,44 @@ def MakeReproducibleAction(target, source, env):
 def SilentActionEcho(target, source, env):
 	return None
 
+def WriteResourceVersion(rcfile, v1, v2, v3=0, v4=0, file_version=True, product_version=True, copyright_year=True, verbose=True):
+    """ Replace version numbers in .rc file. """
+    import datetime, os, re
+
+    regex_list = {}
+    if file_version:
+        regex_list[re.compile(r'^\s*FILEVERSION\s+([\d \t,]+)*$')] = f"{v1},{v2},{v3},{v4}"
+        regex_list[re.compile(r'^\s*VALUE\s+"FileVersion"\s*,\s*"([\d\.]+)"\s*$')] = f"{v1}.{v2}.{v3}.{v4}"
+    if product_version:
+        regex_list[re.compile(r'^\s*PRODUCTVERSION\s+([\d \t,]+)*$')] = f"{v1},{v2},{v3},{v4}"
+        regex_list[re.compile(r'^\s*VALUE\s+"ProductVersion"\s*,\s*"([\d\.]+)"\s*$')] = f"{v1}.{v2}.{v3}.{v4}"
+    if copyright_year:
+        regex_list[re.compile(r'^\s*VALUE\s+"LegalCopyright"\s*,\s*"\D+\d+-(\d+).*$')] = f"{datetime.datetime.now().year}"
+
+    lines = []
+    replaced = 0
+
+    rcfile = rcfile if os.path.isabs(rcfile) else os.path.join(Dir('.').srcnode().abspath, rcfile)
+    with open(rcfile) as file:
+        if verbose: print(f"-- replacing in \"{file.name}\":")
+        for line in file:
+            for regex, value in regex_list.items():
+                if (groups := regex.match(line)) != None:
+                    if (newline := line.replace(groups[1], value)) != line:
+                        if verbose: print(rf'replace "{groups[1]}" with "{value}" ---> ' + newline.replace('\n', '').lstrip())
+                        line = newline
+                        replaced += 1
+                    break
+            lines.append(line)
+
+    if replaced > 0:
+        with open(file.name, 'w') as file:
+            for line in lines:
+                file.write(line)
+            return True
+    else:
+        if verbose: print("file already up-to-date")
+    return False
+
 Export('GetStdSysEnvVarList AddAvailableLibs AddZLib GenerateTryLinkCode FlagsConfigure GetAvailableLibs GetOptionOrEnv SilentActionEcho IsPEExecutable SetPESecurityFlagsWorker SetPEMinOS MakeReproducibleAction')
+Export('WriteResourceVersion')
