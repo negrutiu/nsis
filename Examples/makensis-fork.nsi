@@ -1160,7 +1160,7 @@ Function PageLeaveReinstall
           Quit ; ...yes, already installed, we are done
         Abort
       ${EndIf}
-      MessageBox MB_ICONEXCLAMATION "Unable to uninstall!"
+      MessageBox MB_ICONEXCLAMATION "Unable to uninstall!" /SD IDOK
       Abort
     ${Else}
       StrCpy $0 $R1 1
@@ -1195,7 +1195,7 @@ Section Uninstall
   SetDetailsPrint listonly
 
   IfFileExists $INSTDIR\Bin\makensis.exe nsis_installed
-    MessageBox MB_YESNO "It does not appear that NSIS is installed in the directory '$INSTDIR'.$\r$\nContinue anyway (not recommended)?" IDYES nsis_installed
+    MessageBox MB_YESNO "It does not appear that NSIS is installed in the directory '$INSTDIR'.$\r$\nContinue anyway (not recommended)?" /SD IDYES IDYES nsis_installed
     Abort "Uninstall aborted by user"
   nsis_installed:
 
