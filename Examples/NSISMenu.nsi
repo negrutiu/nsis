@@ -17,18 +17,9 @@ Caption "$(^Name)"
 !define WEB_URL "https://github.com/negrutiu/nsis"
 !define WEB_CAPTION "github.com/negrutiu/nsis"
 
-!macro UNPACKVERFIELD out in shr mask fmt
-!define /redef /math ${out} ${in} >>> ${shr}
-!define /redef /math ${out} ${${out}} & ${mask}
-!define /redef /intfmt ${out} "${fmt}" ${${out}}
-!macroend
-
 !ifndef VER_MAJOR & VER_MINOR
-!ifdef NSIS_PACKEDVERSION
-!insertmacro UNPACKVERFIELD VER_MAJOR ${NSIS_PACKEDVERSION} 24 0x0ff "%u"
-!insertmacro UNPACKVERFIELD VER_MINOR ${NSIS_PACKEDVERSION} 12 0xfff "%u"
-!insertmacro UNPACKVERFIELD VER_REVISION ${NSIS_PACKEDVERSION} 4 255 "%u"
-!insertmacro UNPACKVERFIELD VER_BUILD ${NSIS_PACKEDVERSION} 00 0x00f "%u"
+!ifdef NSIS_VERSION
+!searchparse "${NSIS_VERSION}" 'v' VER_MAJOR '.' VER_MINOR '.' VER_REVISION '.' VER_BUILD	; "v1.2.3.4" -> [1, 2, 3, 4]
 !endif
 !endif
 !ifdef VER_MAJOR & VER_MINOR
