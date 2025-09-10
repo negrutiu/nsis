@@ -6,7 +6,7 @@ Original project's GitHub page: https://github.com/kichik/nsis<br>
 [![License: zlib/libpng](https://img.shields.io/badge/License-zlib%2Flibpng-blue.svg)](http://nsis.sourceforge.net/License)
 [![Latest Release](https://img.shields.io/badge/dynamic/json.svg?label=Latest%20Release&url=https%3A%2F%2Fapi.github.com%2Frepos%2Fnegrutiu%2Fnsis%2Freleases%2Flatest&query=%24.name&colorB=orange)](../../releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/negrutiu/nsis/total.svg?label=Downloads&colorB=orange)](../../releases/latest)
-[![GitHub issues](https://img.shields.io/github/issues/negrutiu/nsis.svg?label=Issues)](../../issues)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-GitHub%20Actions-blue?logo=github)](https://github.com/marketplace/actions/install-negrutiu-nsis)
 
 This project was started mainly to offer you early access to the NSIS 64-bit features.<br>
 I've also included a bunch of extra plugins for you to play with... Enjoy!
@@ -24,3 +24,4 @@ I've also included a bunch of extra plugins for you to play with... Enjoy!
 * Two new extra-large UI themes [ModernXL](https://github.com/negrutiu/nsis/wiki/ModernXL/) and [ModernXXL](https://github.com/negrutiu/nsis/wiki/ModernXL/)
 * Advanced logging enabled (`NSIS_CONFIG_LOG`)
 * Large strings (`NSIS_MAX_STRLEN=4096`)
+* Available [GitHub Action](https://github.com/marketplace/actions/install-negrutiu-nsis) to install this on Windows runners
