@@ -352,6 +352,7 @@ ${MementoSection} "Script Examples" SecExample
   SectionIn 1 2
   SetOutPath $INSTDIR\Examples
   File ..\Examples\makensis.nsi
+  File ..\Examples\makensis-fork.nsi
   File ..\Examples\example1.nsi
   File ..\Examples\example2.nsi
   File ..\Examples\AppGen.nsi
