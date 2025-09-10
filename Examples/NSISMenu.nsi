@@ -170,7 +170,7 @@ nsDialogs::CreateControl ${__NSD_Icon_CLASS} ${__NSD_Icon_STYLE}|${SS_CENTERIMAG
 Pop $0
 ${SetCtlColors} $0 "" "" ${CB_HEADER}
 
-CreateFont $1 "Trebuchet MS" 17
+CreateFont $1 "Trebuchet MS" 15
 !searchreplace VERSTR "${NSIS_VERSION}" "v" ""
 nsDialogs::CreateControl ${__NSD_Label_CLASS} ${__NSD_Label_STYLE}|${SS_CENTERIMAGE}|${SS_ENDELLIPSIS} ${__NSD_Label_EXSTYLE} 34u 1u -34u ${UY_HEADER}u "nullsoft scriptable install system ${VERSTR}"
 Pop $0
