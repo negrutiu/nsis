@@ -14,6 +14,9 @@ CompletedText " "
 LangString ^ClickInstall 0 " "
 Caption "$(^Name)"
 
+!define WEB_URL "https://github.com/negrutiu/nsis"
+!define WEB_CAPTION "github.com/negrutiu/nsis"
+
 !macro UNPACKVERFIELD out in shr mask fmt
 !define /redef /math ${out} ${in} >>> ${shr}
 !define /redef /math ${out} ${${out}} & ${mask}
@@ -37,7 +40,7 @@ VIAddVersionKey "ProductName" "NSIS"
 VIAddVersionKey "ProductVersion" "${VERSTR}"
 VIAddVersionKey "FileVersion" "${VERSTR}"
 VIAddVersionKey "FileDescription" "NSIS Menu"
-VIAddVersionKey "LegalCopyright" "http://nsis.sf.net/License"
+VIAddVersionKey "LegalCopyright" "${WEB_URL}"
 !endif
 
 !include nsDialogs.nsh
@@ -243,11 +246,11 @@ ${NSD_CreateLabel} 0 -22u 100% 1 ""
 Pop $0
 ${SetCtlColors} $0 000000 000000 ${CB_FOOTERLINE}
 
-nsDialogs::CreateControl ${__NSD_Label_CLASS} ${__NSD_Label_STYLE}|${SS_CENTERIMAGE}|${SS_NOTIFY} ${__NSD_Label_EXSTYLE} -110u -20u 100% 20u "nsis.sourceforge.net"
+nsDialogs::CreateControl ${__NSD_Label_CLASS} ${__NSD_Label_STYLE}|${SS_CENTERIMAGE}|${SS_NOTIFY} ${__NSD_Label_EXSTYLE} -124u -21u 100% 20u "${WEB_CAPTION}"
 Pop $0
 ${SetCtlColors} $0 ${CT_FOOTER} transparent transparent
 SendMessage $0 ${WM_SETFONT} ${HF_HEADER} 1
-nsDialogs::SetUserData $0 "https://nsis.sourceforge.io"
+nsDialogs::SetUserData $0 "${WEB_URL}"
 ${NSD_OnClick} $0 OnLinkClick
 
 nsDialogs::Show
