@@ -6,14 +6,25 @@ files = Split("""
 	substart.c
 """)
 
+res = Split("""
+	resource.rc
+""")
+
+resources = Split("""
+	manifest.xml
+""")
+
 libs = Split("""
 	kernel32
 	user32
 """)
 
+Import('env WriteResourceVersion')
+WriteResourceVersion('resource.rc', env['VER_MAJOR'], env['VER_MINOR'], env['VER_REVISION'], env['VER_BUILD'])
+
 Import('BuildUtil')
 
-substart = BuildUtil(target, files, libs, cli = True, noinstall = True, nodeflib = True)
+substart = BuildUtil(target, files, libs, res = res, resources = resources, cli = True, noinstall = True, nodeflib = True)
 
 if env['PLATFORM'] == 'win32':
 	env.DistributeBin(substart, names=['makensis.exe'], alias='install-compiler') # install as makensis

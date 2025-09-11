@@ -51,6 +51,9 @@ docs = Split("""
 	Readme.txt
 """)
 
+Import('env WriteResourceVersion')
+WriteResourceVersion('resource.rc', env['VER_MAJOR'], env['VER_MINOR'], env['VER_REVISION'], env['VER_BUILD'])
+
 Import('BuildUtil')
 
 BuildUtil(

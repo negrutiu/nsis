@@ -32,6 +32,9 @@ headers = Split("""
 
 Import('BuildUtil defenv')
 
+Import('WriteResourceVersion')
+WriteResourceVersion('res.rc', defenv['VER_MAJOR'], defenv['VER_MINOR'], defenv['VER_REVISION'], defenv['VER_BUILD'])
+
 BuildUtil(target, files, libs, res = rc, resources = resources)
 
 defenv.DistributeContrib(headers,path=target)

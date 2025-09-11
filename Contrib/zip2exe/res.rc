@@ -29,7 +29,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 IDD_DIALOG1 DIALOGEX 0, 0, 360, 271
 STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION |
     WS_SYSMENU
-CAPTION "Zip2Exe 0.40"
+CAPTION "Zip2Exe"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     ICON            IDI_ICON1,IDC_NSISICON,6,6,20,20
@@ -134,6 +134,44 @@ IDI_ICON1               ICON                    "icon.ico"
 //
 
 1                       RT_MANIFEST             "zip2exe.xml"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "NSIS Project"
+            VALUE "FileDescription", "Zip2Exe"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "LegalCopyright", "(C)1999-2025 Nullsoft and Contributors"
+            VALUE "OriginalFilename", "zip2exe.exe"
+            VALUE "ProductName", "NSIS"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

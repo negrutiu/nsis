@@ -12,10 +12,21 @@ files = Split("""
 	POSIXUtil.cpp
 """)
 
+res = Split("""
+	resource.rc
+""")
+
+resources = Split("""
+	manifest.xml
+""")
+
 libs = Split("""
 	z
 """)
 
+Import('env WriteResourceVersion')
+WriteResourceVersion('resource.rc', env['VER_MAJOR'], env['VER_MINOR'], env['VER_REVISION'], env['VER_BUILD'])
+
 Import('BuildUtil')
 
-BuildUtil(target, files, libs, flags = ['$EXCEPTION_FLAG'], cross_platform = True, cli = True)
+BuildUtil(target, files, libs, res=(res if env['PLATFORM'] == 'win32' else None), resources=(resources if env['PLATFORM'] == 'win32' else None), flags = ['$EXCEPTION_FLAG'], cross_platform = True, cli = True)

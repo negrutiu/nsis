@@ -31,6 +31,7 @@ VIAddVersionKey "ProductName" "NSIS"
 VIAddVersionKey "ProductVersion" "${VERSTR}"
 VIAddVersionKey "FileVersion" "${VERSTR}"
 VIAddVersionKey "FileDescription" "NSIS Menu"
+VIAddVersionKey "CompanyName" "NSIS Project"
 VIAddVersionKey "LegalCopyright" "${WEB_URL}"
 !endif
 

@@ -61,6 +61,14 @@ libs = Split("""
 	shell32
 """)
 
+res = Split("""
+	resource.rc
+""")
+
+resources = Split("""
+	manifest.xml
+""")
+
 Import('env AddAvailableLibs AddZLib')
 
 ##### Use available libraries
@@ -83,6 +91,20 @@ env.Append(CPPDEFINES = ['_WIN32_IE=0x0500'])
 # XXX doesn't work
 #env['PCH'] = env.PCH(pch)[0]
 #env['PCHSTOP'] = pch
+
+##### Resource files (Windows only)
+
+if env['PLATFORM'] == 'win32':
+	def AppendRES(env, files, res, resources):
+		if res:
+			target = Flatten(File(res))[0].name.replace('.rc', '-rc')
+			target_res = env.RES(target, res)
+			if resources:
+				env.Depends(target_res, resources)
+			files.append(target_res)
+	Import('WriteResourceVersion')
+	WriteResourceVersion('resource.rc', env['VER_MAJOR'], env['VER_MINOR'], env['VER_REVISION'], env['VER_BUILD'])
+	AppendRES(env, makensis_files, res, resources)
 
 ##### LZMA specific defines
 
