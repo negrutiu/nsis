@@ -14,6 +14,8 @@ Released on ???? ??th, 2026
 
 \b Support Python older than 3.6 again (\W{http://sf.net/p/nsis/bugs/1325}{bug #1325})
 
+\b Preliminary ARM64 support in makensis.nsi (\W{http://sf.net/p/nsis/patches/318}{patch #318})
+
 \H{v3.11} 3.11
 
 Released on March 8th, 2025

@@ -292,7 +292,6 @@ EXTERN_C void NSISWinMainNOCRT()
   {
     GetWindowsDirectory(state_temp_dir, NSIS_MAX_STRLEN - 5); // leave space for \Temp
     mystrcat(state_temp_dir, _T("\\Temp"));
-
     if (!ValidateTempDir())
     {
       // Bug #1326:
