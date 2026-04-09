@@ -1,5 +1,15 @@
 \A{history} Changelog and Release Notes
 
+\H{v3.11.1} 3.11.1
+
+Released on ???? ??th, 2026
+
+\S1{v3.11.1-cl} Changelog
+
+\S2{} Build System
+
+\b Support Python older than 3.6 again (\W{http://sf.net/p/nsis/bugs/1325}{bug #1325})
+
 \H{v3.11} 3.11
 
 Released on March 8th, 2025
