@@ -6,6 +6,10 @@ Released on ???? ??th, 2026
 
 \S1{v3.11.1-cl} Changelog
 
+\S2{} Security
+
+\b Don't use the Low IL temp directory when elevated (thanks Richard Warren for responsibly disclosing, \W{http://sf.net/p/nsis/bugs/1326}{bug #1326})\\<br\\>This stops a possible privilege escalation for installers running as SYSTEM.
+
 \S2{} Build System
 
 \b Support Python older than 3.6 again (\W{http://sf.net/p/nsis/bugs/1325}{bug #1325})
