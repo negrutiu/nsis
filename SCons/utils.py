@@ -174,7 +174,8 @@ def FileUnpackRead(pack, size, f, fpos=None, defval=None):
 		if not fpos is None: f.seek(fpos)
 		r = struct.unpack(pack, f.read(size))[0]
 	finally:
-		return r
+		pass
+	return r
 def ReadU16LE(f, fpos=None, defval=None):
 	return FileUnpackRead("<H", 2, f, fpos, defval)
 def ReadU32LE(f, fpos=None, defval=None):
@@ -265,7 +266,7 @@ def SetPESecurityFlagsWorker(filepath):
 		pe.WriteDllCharacteristics(ioh_dc)
 		pe.InvalidateChecksum()
 	finally:
-		return
+		pass
 
 def SetPETimestamp(filepath, timestamp):
 	pe = MSPE(filepath, open_for_write=True)
@@ -275,7 +276,7 @@ def SetPETimestamp(filepath, timestamp):
 		pe.InvalidateChecksum()
 		return True
 	finally:
-		return
+		pass
 
 def SetPEMinOS(filepath, osMajor, osMinor, ssMajor, ssMinor):
 	pe = MSPE(filepath, open_for_write=True)
@@ -288,7 +289,7 @@ def SetPEMinOS(filepath, osMajor, osMinor, ssMajor, ssMinor):
 		pe.InvalidateChecksum()
 		return True
 	finally:
-		return
+		pass
 
 def MakeReproducibleAction(target, source, env):
 	if env.get('SOURCE_DATE_EPOCH','') != '':
