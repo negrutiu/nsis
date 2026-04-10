@@ -169,12 +169,11 @@ def GetOptionOrEnv(name, defval = None):
 
 import struct
 def FileUnpackRead(pack, size, f, fpos=None, defval=None):
-	r = defval
 	try:
 		if not fpos is None: f.seek(fpos)
 		r = struct.unpack(pack, f.read(size))[0]
-	finally:
-		pass
+	except:
+		r = defval
 	return r
 def ReadU16LE(f, fpos=None, defval=None):
 	return FileUnpackRead("<H", 2, f, fpos, defval)
