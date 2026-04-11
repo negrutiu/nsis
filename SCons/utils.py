@@ -242,7 +242,7 @@ def IsPE(pe):
 
 def IsPEExecutable(pe):
 	if not isinstance(pe, MSPE): pe = MSPE(pe)
-	if int(pe.ReadCharacteristics() or 0) & 0x0002: return True # IMAGE_FILE_EXECUTABLE_IMAGE?
+	if IsPE(pe) and int(pe.ReadCharacteristics() or 0) & 0x0002: return True # IMAGE_FILE_EXECUTABLE_IMAGE?
 
 def SetPESecurityFlagsWorker(filepath):
 	"""
@@ -264,8 +264,8 @@ def SetPESecurityFlagsWorker(filepath):
 			if pe.IsPEP: ioh_dc |= 0x0020 # +IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA (HEASLR)
 		pe.WriteDllCharacteristics(ioh_dc)
 		pe.InvalidateChecksum()
-	finally:
-		pass
+	except:
+		raise RuntimeError('Failed writing PE characteristics (%s)' % (filepath))
 
 def SetPETimestamp(filepath, timestamp):
 	pe = MSPE(filepath, open_for_write=True)
@@ -287,8 +287,8 @@ def SetPEMinOS(filepath, osMajor, osMinor, ssMajor, ssMinor):
 		pe.WriteSubsystemMinor(ssMinor)
 		pe.InvalidateChecksum()
 		return True
-	finally:
-		pass
+	except:
+		raise RuntimeError('Failed writing PE OS version (%s)' % (filepath))
 
 def MakeReproducibleAction(target, source, env):
 	if env.get('SOURCE_DATE_EPOCH','') != '':
