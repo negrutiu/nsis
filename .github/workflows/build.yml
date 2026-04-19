@@ -8,16 +8,17 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         python-version: ['3.x']  # 2.x is supported but EOL on GitHub Actions
-        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-13, windows-2019, windows-2022]  # TODO fails to find cppunit on macos-14/15
+        os: [ubuntu-22.04, ubuntu-24.04, macos-14, macos-15, macos-latest, windows-2022, windows-2025]
         log: [yes, no]
         include:
           - nightly: nightly
-            os: windows-2019
+            os: windows-2022
             log: no
             python-version: 3.x
-    
+
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -26,7 +27,7 @@ jobs:
         run: |
           brew install scons mingw-w64 zlib
           curl --retry 9 -sLo cppunit.rb "https://sourceforge.net/p/nsis/code/HEAD/tree/web-scripts/trunk/cppunit.rb?format=raw"
-          brew install -s --formula cppunit.rb
+          HOMEBREW_DEVELOPER=true brew install -s --formula cppunit.rb
         if: startsWith(matrix.os, 'macos')
       - name: Apt Dependencies
         run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y scons g++-mingw-w64-i686 binutils-mingw-w64-i686 zlib1g-dev libcppunit-dev
@@ -50,12 +51,16 @@ jobs:
       - name: Zlib Dependency
         run: |
           curl --retry 9 -sLo $HOME/zlib.zip "https://downloads.sourceforge.net/project/libpng/zlib/1.2.8/zlib128-dll.zip?r=&ts=1403402496&use_mirror=hivelocity"
-          mkdir $HOME/zlib
-          unzip $HOME/zlib.zip -d $HOME/zlib
-      - name: Build
+          mkdir -p $HOME/zlib
+          unzip -o $HOME/zlib.zip -d $HOME/zlib
+      - name: Build (Linux)
         run: |
           scons ZLIB_W32=$HOME/zlib SKIPUTILS="NSIS Menu" NSIS_CONFIG_LOG=${{ matrix.log }} test dist-zip
-        if: "!startsWith(matrix.os, 'windows')"
+        if: startsWith(matrix.os, 'ubuntu')
+      - name: Build (MacOS)
+        run: |
+          scons ZLIB_W32=$HOME/zlib SKIPUTILS="NSIS Menu" NSIS_CONFIG_LOG=${{ matrix.log }} APPEND_CPPPATH=/opt/homebrew/include APPEND_LIBPATH=/opt/homebrew/lib test dist-zip
+        if: startsWith(matrix.os, 'macos')
       - name: Build (Windows)
         run: |
           scons ZLIB_W32=$HOME/zlib SKIPUTILS="NSIS Menu" NSIS_CONFIG_LOG=${{ matrix.log }} APPEND_CPPPATH=$HOME/cppunit/include APPEND_LIBPATH=$HOME/cppunit/lib/release-win32 test dist
@@ -80,7 +85,7 @@ jobs:
 
   nightly:
     if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [build]
     steps:
       - name: Download a single artifact
