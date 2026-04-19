@@ -517,20 +517,22 @@ int WideCharToMultiByte(UINT CodePage, DWORD dwFlags, const wchar_t* lpWideCharS
   char cp[CODEPAGESTR_MAXLEN];
   create_code_page_string(cp, COUNTOF(cp), CodePage);
   iconv_t cd = iconv_open(cp, "wchar_t");
+  size_t cchNull = 0;
   if (cd == (iconv_t) -1) return 0;
-  if (cchWideChar < 0) cchWideChar = (int) wcslen(lpWideCharStr) + 1;
-  if (cbMultiByte == 0) cbMultiByte = sizeof(buffer), lpMultiByteStr = buffer;
+  if (cchWideChar < 0) cchWideChar = (int) wcslen(lpWideCharStr), ++cchNull;
+  if (cbMultiByte == 0) cbMultiByte = COUNTOF(buffer) - cchNull, lpMultiByteStr = buffer;
 
   char *in = (char *) lpWideCharStr, *out = lpMultiByteStr;
   size_t inbytes = cchWideChar * sizeof(wchar_t), outbytes = cbMultiByte;
-
   if (nsis_iconv_adaptor(iconv, cd, &in, &inbytes, &out, &outbytes) == (size_t) -1) {
     iconv_close(cd);
     return 0;
   }
-
   iconv_close(cd);
-  return cbMultiByte - outbytes;
+
+  size_t cConv = (cbMultiByte - outbytes);
+  if (cchNull && cbMultiByte) lpMultiByteStr[cConv] = '\0';
+  return cConv + cchNull;
 }
 
 int MultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiByteStr,
@@ -540,20 +542,22 @@ int MultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiByteStr,
   char cp[CODEPAGESTR_MAXLEN];
   create_code_page_string(cp, COUNTOF(cp), CodePage);
   iconv_t cd = iconv_open("wchar_t", cp);
+  size_t cchNull = 0; // iconv on MacOS 14 & 15 does not parse the \0, we have to keep track of it.
   if (cd == (iconv_t) -1) return 0;
-  if (cbMultiByte < 0) cbMultiByte = strlen(lpMultiByteStr) + 1;
-  if (cchWideChar == 0) cchWideChar = sizeof(buffer), lpWideCharStr = buffer;
+  if (cbMultiByte < 0) cbMultiByte = strlen(lpMultiByteStr), ++cchNull;
+  if (cchWideChar == 0) cchWideChar = COUNTOF(buffer) - cchNull, lpWideCharStr = buffer;
 
   char *in = (char *) lpMultiByteStr, *out = (char *) lpWideCharStr;
   size_t inbytes = cbMultiByte, outbytes = cchWideChar * sizeof(wchar_t);
-
   if (nsis_iconv_adaptor(iconv, cd, &in, &inbytes, &out, &outbytes) == (size_t) -1) {
     iconv_close(cd);
     return 0;
   }
-
   iconv_close(cd);
-  return cchWideChar - (outbytes / sizeof (wchar_t));
+
+  size_t cConv = cchWideChar - (outbytes / sizeof (wchar_t));
+  if (cchNull && cchWideChar) lpWideCharStr[cConv] = '\0';
+  return cConv + cchNull;
 }
 
 BOOL IsValidCodePage(UINT CodePage)

@@ -16,9 +16,24 @@ int main(int argc, char* argv[])
   CppUnit::TextUi::TestRunner runner;
   runner.addTest( suite );
 
+  // Print system info
+  std::ostream &outstream = std::cerr;
+#ifdef _UNICODE
+  const char *defunicode = "Unicode ";
+#else
+  const char *defunicode = "Ansi ";
+#endif
+#ifdef MAKENSIS
+  const char *defmknsis = "MAKENSIS ";
+#else
+  const char *defmknsis = "";
+#endif
+  outstream << "Running tests as " << defunicode << defmknsis
+            << (sizeof(void*) * 8) << "-bit (wchar_t=" << sizeof(wchar_t)
+            << " TCHAR=" << sizeof(TCHAR) << ")\n";
+
   // Change the default outputter to a compiler error format outputter
-  runner.setOutputter( new CppUnit::CompilerOutputter( &runner.result(),
-                                                       std::cerr ) );
+  runner.setOutputter(new CppUnit::CompilerOutputter(&runner.result(), outstream));
   // Run the tests.
   bool wasSuccessful = runner.run();
 
