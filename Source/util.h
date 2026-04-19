@@ -144,7 +144,7 @@ struct CStdFileStreamOnMemory
     case SEEK_SET: newpos = (size_t) offset, invalid = offset < 0; break;
     case SEEK_CUR: newpos = s->m_pos + offset; break;
     case SEEK_END: newpos = s->m_cb + offset; break;
-    default: ++invalid;
+    default: newpos = ++invalid; // Assigning to newpos to avoid warning on Mac
     }
     if (!(invalid += s->m_cb <= newpos)) s->m_pos = newpos;
     return (int) invalid;
