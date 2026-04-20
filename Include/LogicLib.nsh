@@ -394,7 +394,7 @@
       StrCpy $2 $1 $_LOGICLIB_TEMP
       StrCmp $2 "" _LL${LOGICLIB_COUNTER}_Done
       StrCpy $1 $1 "" 1
-      ${_op} $2 $0 ""_LL${LOGICLIB_COUNTER}_Loop
+      ${_op} $2 $0 "" _LL${LOGICLIB_COUNTER}_Loop
       StrCpy $_LOGICLIB_TEMP ""
     _LL${LOGICLIB_COUNTER}_Done:
     Pop $2

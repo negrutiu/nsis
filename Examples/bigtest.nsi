@@ -84,6 +84,14 @@ Section "" ; empty string makes it hidden, so would starting with -
 
 SectionEnd
 
+Section "Bugs"
+
+  StrCmp a b ""badtoken_bug1327
+  MessageBox MB_OK "If you see this, compiler behavior changed!"
+  badtoken_bug1327:
+
+SectionEnd
+
 Section "TempTest"
 
 SectionIn 1 2 3
