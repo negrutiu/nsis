@@ -3,7 +3,7 @@
  * 
  * This file is a part of NSIS.
  * 
- * Copyright (C) 1999-2025 Nullsoft and Contributors
+ * Copyright (C) 1999-2026 Nullsoft and Contributors
  * 
  * Licensed under the zlib/libpng license (the "License");
  * you may not use this file except in compliance with the License.
@@ -294,6 +294,11 @@ EXTERN_C void NSISWinMainNOCRT()
     mystrcat(state_temp_dir, _T("\\Temp"));
     if (!ValidateTempDir())
     {
+      // Bug #1326:
+      // Don't try the Low IL temp directory if we are elevated.
+      // This prevents the SYSTEM user from using the shared c:\Windows\Temp\Low directory.
+      if (UserIsAdminGrpMember()) goto end;
+
       // Bug #2909242:
       // When running at <= Low IL we cannot write to %Temp% but we can try the temp folder used by IE.
       // There does not seem to be a API to get the low temp dir directly, so we build the path on our own

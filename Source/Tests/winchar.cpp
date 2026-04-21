@@ -24,6 +24,7 @@ class WinCharTest : public CppUnit::TestFixture {
   CPPUNIT_TEST( testStrLen );
   CPPUNIT_TEST( testStrCmp );
   CPPUNIT_TEST( testStrDup );
+  CPPUNIT_TEST( testWin32Emulation );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -115,6 +116,38 @@ public:
     CPPUNIT_ASSERT_EQUAL( 0, WinWStrCmp(a, b) );
 
     free(b);
+  }
+
+  void testWin32Emulation() {
+    char nb[42], narrowTest[] = "Test";
+    wchar_t wb[42], wideTest[] = L"Test";
+    int c, c2;
+
+    c = MultiByteToWideChar(0, 0, "Test", -1, NULL, 0);
+    CPPUNIT_ASSERT( c == 5 );
+    c = MultiByteToWideChar(0, 0, "Test", c2 = 3, NULL, 0);
+    CPPUNIT_ASSERT( c == c2 );
+    c = MultiByteToWideChar(0, 0, "Test", c2 = 4, NULL, 0);
+    CPPUNIT_ASSERT( c == c2 );
+    #ifndef __APPLE__ // BUGBUG: This is broken on MacOS 14 & 15
+    c = MultiByteToWideChar(0, 0, "Test", c2 = 5, NULL, 0);
+    CPPUNIT_ASSERT( c == c2 );
+    #endif
+    MultiByteToWideChar(0, 0, "Test", -1, wb, COUNTOF(wb));
+    CPPUNIT_ASSERT_EQUAL( 0, memcmp(wideTest, wb, 5 * sizeof(*wb)) );
+
+    c = WideCharToMultiByte(0, 0, L"Test", -1, NULL, 0, NULL, NULL);
+    CPPUNIT_ASSERT( c == 5 );
+    c = WideCharToMultiByte(0, 0, L"Test", c2 = 3, NULL, 0, NULL, NULL);
+    CPPUNIT_ASSERT( c == c2 );
+    c = WideCharToMultiByte(0, 0, L"Test", c2 = 4, NULL, 0, NULL, NULL);
+    CPPUNIT_ASSERT( c == c2 );
+    #ifndef __APPLE__ // BUGBUG: This is broken on MacOS 14 & 15
+    c = WideCharToMultiByte(0, 0, L"Test", c2 = 5, NULL, 0, NULL, NULL);
+    CPPUNIT_ASSERT( c == c2 );
+    #endif
+    WideCharToMultiByte(0, 0, L"Test", -1, nb, COUNTOF(nb), NULL, NULL);
+    CPPUNIT_ASSERT_EQUAL( 0, memcmp(narrowTest, nb, 5 * sizeof(*nb)) );
   }
 
 };

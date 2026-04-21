@@ -623,7 +623,7 @@ Export('plugin_env plugin_uenv')
 if defenv['PLATFORM'] == 'win32':
 	def build_nsis_menu_for_zip(target, source, env):
 		cmdline = FindMakeNSIS(env, str(env['ZIPDISTDIR']))
-		if Execute(f'"{cmdline}" "{source[0].abspath}" /X"OutFile {target[0].abspath}"'):
+		if Execute('''"{}" "{}" /X"OutFile '{}'" '''.format(cmdline, source[0].abspath, target[0].abspath)):
 			Exit(1)
 
 	nsis_menu_target = defenv.Command(

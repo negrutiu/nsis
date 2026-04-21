@@ -54,32 +54,36 @@
 
 #include "md5.h"
 
-#if _MSC_VER >= 1900
-/* [marius]
-   Disable optimizations in md5_memcpy
-   The compiler will replace the `for` loop with `_memcpy` which is missing in /NODEFAULTLIBS builds
-*/
-#pragma optimize("", off)
-#endif
+#if defined(_WIN64) && defined(_MSC_VER)
+#define MD5_SIZE_T unsigned __int64
+#else
+#define MD5_SIZE_T unsigned int
+#endif 
 
-void md5_memcpy( void *dest, const void *src, int count ) {
+#if _MSC_VER-0 >= 1930
+/* Work around "error LNK2019: unresolved external symbol _memcpy referenced in function _md5_memcpy" in VS2022 */
+void* memcpy(void *dest, const void *src, MD5_SIZE_T count);
+#pragma function(memcpy)
+#define md5_memcpy memcpy
+#endif
+void* md5_memcpy(void *dest, const void *src, MD5_SIZE_T count) {
   md5_byte_t* bDest = (md5_byte_t*)dest;
   md5_byte_t* bSrc = (md5_byte_t*)src;
-  int i = 0;
-  for(; i < count; i++) {
+  MD5_SIZE_T i = 0;
+  for(; i < count; i++)
     bDest[i] = bSrc[i];
-  }
+  return dest;
 }
-
-#if _MSC_VER >= 1900
-#pragma optimize("", on)
-#endif
 
 #undef BYTE_ORDER	/* 1 = big-endian, -1 = little-endian, 0 = unknown */
 #ifdef ARCH_IS_BIG_ENDIAN
 #  define BYTE_ORDER (ARCH_IS_BIG_ENDIAN ? 1 : -1)
 #else
-#  define BYTE_ORDER 0
+#  ifdef _WIN32
+#    define BYTE_ORDER -1
+#  else
+#    define BYTE_ORDER 0
+#  endif
 #endif
 
 #define T_MASK ((md5_word_t)~0)

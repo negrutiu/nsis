@@ -2,7 +2,7 @@
  * This file is a part of the bzip2 compression module for NSIS.
  * 
  * Copyright and license information can be found below.
- * Modifications Copyright (C) 1999-2025 Nullsoft and Contributors
+ * Modifications Copyright (C) 1999-2026 Nullsoft and Contributors
  * 
  * The original zlib source code is available at
  * http://www.bzip.org/
@@ -296,7 +296,7 @@ void generateMTFValues ( EState* s )
 static
 void sendMTFValues ( EState* s )
 {
-   Int32 v, t, i, j, gs, ge, totc, bt, bc, iter;
+   Int32 v, t, i, j, gs, ge, /*totc,*/ bt, bc, iter;
    Int32 nSelectors, alphaSize, minLen, maxLen, selCtr;
    Int32 nGroups;
 
@@ -388,7 +388,7 @@ void sendMTFValues ( EState* s )
       }
 
       nSelectors = 0;
-      totc = 0;
+      /*totc = 0;*/
       gs = 0;
       while (True) {
 
@@ -447,7 +447,7 @@ void sendMTFValues ( EState* s )
          bc = 999999999; bt = -1;
          for (t = 0; t < nGroups; t++)
             if (cost[t] < bc) { bc = cost[t]; bt = t; };
-         totc += bc;
+         /*totc += bc;*/
          fave[bt]++;
          s->selector[nSelectors] = bt;
          nSelectors++;

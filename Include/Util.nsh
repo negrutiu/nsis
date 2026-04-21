@@ -169,13 +169,12 @@ Pop ${_outvar}
 !include LogicLib.nsh
 !endif
 !insertmacro _LOGICLIB_TEMP
-Push $1
-System::Call '*(i${SYSSIZEOF_HIGHCONTRAST},i0,p)p.r1'
-System::Call 'USER32::SystemParametersInfo(i${SPI_GETHIGHCONTRAST},i${SYSSIZEOF_HIGHCONTRAST},pr1,i0)'
-System::Call '*$1(i,i.s)'
+System::Call '*(i${SYSSIZEOF_HIGHCONTRAST},i0,p)p.s'
+System::Call 'USER32::SystemParametersInfo(i${SPI_GETHIGHCONTRAST},i${SYSSIZEOF_HIGHCONTRAST},pss,i0)'
 Pop $_LOGICLIB_TEMP
-System::Free $1
-Pop $1
+System::Call '*$_LOGICLIB_TEMP(i,i.s)'
+System::Free $_LOGICLIB_TEMP
+Pop $_LOGICLIB_TEMP
 !insertmacro _& $_LOGICLIB_TEMP ${HCF_HIGHCONTRASTON} `${_t}` `${_f}`
 !macroend
 

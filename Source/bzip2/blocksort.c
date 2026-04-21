@@ -2,7 +2,7 @@
  * This file is a part of the bzip2 compression module for NSIS.
  * 
  * Copyright and license information can be found below.
- * Modifications Copyright (C) 1999-2025 Nullsoft and Contributors
+ * Modifications Copyright (C) 1999-2026 Nullsoft and Contributors
  * 
  * The original zlib source code is available at
  * http://www.bzip.org/
@@ -807,7 +807,7 @@ void mainSort ( UInt32* ptr,
    Int32  copyStart[256];
    Int32  copyEnd  [256];
    UChar  c1;
-   Int32  numQSorted;
+   /*Int32  numQSorted;*/
    UInt16 s;
 
    /*-- set up the 2-byte frequency table --*/
@@ -905,7 +905,7 @@ void mainSort ( UInt32* ptr,
       The main sorting loop.
    --*/
 
-   numQSorted = 0;
+   /*numQSorted = 0;*/
 
    for (i = 0; i <= 255; i++) {
 
@@ -936,7 +936,7 @@ void mainSort ( UInt32* ptr,
                      ptr, block, quadrant, nblock, 
                      lo, hi, BZ_N_RADIX, budget 
                   );   
-                  numQSorted += (hi - lo + 1);
+                  /*numQSorted += (hi - lo + 1);*/
                   if (*budget < 0) return;
                }
             }
