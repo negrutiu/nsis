@@ -63,7 +63,7 @@ Import('defenv')
 
 examples = [
     pluginDir.joinpath('Examples', 'NScurl', 'NScurl-Test.nsi'),
-    pluginDir.joinpath('Examples', 'NScurl', 'NScurl-Test-build.bat')
+    pluginDir.joinpath('Examples', 'NScurl', 'NScurl-Test.bat')
 ]
 
 docs = [
