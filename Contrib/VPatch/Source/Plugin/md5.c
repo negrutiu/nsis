@@ -60,12 +60,12 @@
 #define MD5_SIZE_T unsigned int
 #endif 
 
-#if _MSC_VER-0 >= 1930
-/* Work around "error LNK2019: unresolved external symbol _memcpy referenced in function _md5_memcpy" in VS2022 */
-void* memcpy(void *dest, const void *src, MD5_SIZE_T count);
-#pragma function(memcpy)
-#define md5_memcpy memcpy
+#if _MSC_VER >= 1900
+/* [marius] Disable compiler optimizations.
+   The compiler will replace the `for` loop with `_memcpy()` call which leads to link error in /NODEFAULTLIBS builds. */
+#pragma optimize("", off)
 #endif
+
 void* md5_memcpy(void *dest, const void *src, MD5_SIZE_T count) {
   md5_byte_t* bDest = (md5_byte_t*)dest;
   md5_byte_t* bSrc = (md5_byte_t*)src;
@@ -74,6 +74,11 @@ void* md5_memcpy(void *dest, const void *src, MD5_SIZE_T count) {
     bDest[i] = bSrc[i];
   return dest;
 }
+
+#if _MSC_VER >= 1900
+/* [marius] Restore compiler optimizations */
+#pragma optimize("", on)
+#endif
 
 #undef BYTE_ORDER	/* 1 = big-endian, -1 = little-endian, 0 = unknown */
 #ifdef ARCH_IS_BIG_ENDIAN
