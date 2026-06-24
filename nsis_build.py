@@ -96,6 +96,7 @@ def setup_msvc_environ(arch):
 
     # guess the platform toolset version
     toolset = None
+    if jout[0]['catalog']['productLineVersion'] == '18': toolset = 'v145'
     if jout[0]['catalog']['productLineVersion'] == '2022': toolset = 'v143'
     if jout[0]['catalog']['productLineVersion'] == '2019': toolset = 'v142'
     if jout[0]['catalog']['productLineVersion'] == '2017': toolset = 'v141'
