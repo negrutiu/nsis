@@ -280,6 +280,8 @@ for i in defenv['NSIS_CPPDEFINES']:
 	else:
 		sconf_h.write('#define %s\n' % (i))
 		defines_h.write('definedlist.add(_T("%s"));\n' % (i))
+
+sconf_h.write('#define NSIS_DEFAULT_TARGET_ARCH "%s"\n' % defenv['TARGET_ARCH'])
 sconf_h.close()
 defines_h.close()
 

@@ -1,13 +1,15 @@
 ﻿;Language: Italian (1040)
-;By SANFACE Software <sanface@sanface.com> v1.67 accents
+
 ;Review and update from v1.65 to v1.67 by Alessandro Staltari < staltari (a) geocities.com >
+;Review and update v.1.67 by SANFACE <sanface@sanface.com>
 ;Review and update from v1.67 to v1.68 by Lorenzo Bevilacqua < meow811@libero.it >
+;Review and update from v1.68 to 3.0x by bovirus < bovirus@gmail.com >
 
 !insertmacro LANGFILE "Italian" = "Italiano" =
 
 !ifdef MUI_WELCOMEPAGE
   ${LangFileString} MUI_TEXT_WELCOME_INFO_TITLE "Installazione di $(^NameDA)"
-  ${LangFileString} MUI_TEXT_WELCOME_INFO_TEXT "Questo programma installerà $(^NameDA) nel computer.$\r$\n$\r$\nSi raccomanda di chiudere tutte le altre applicazioni prima di iniziare l'installazione. Questo permetterà al programma di installazione di aggiornare i file di sistema senza dover riavviare il computer.$\r$\n$\r$\n$_CLICK"
+  ${LangFileString} MUI_TEXT_WELCOME_INFO_TEXT "Questo programma installerà $(^NameDA) nel computer.$\r$\n$\r$\nPrima di iniziare l'installazione ti suggeriamo di chiudere tutte le altre applicazioni. Questo permetterà al programma di installazione di aggiornare i file di sistema senza dover riavviare il computer.$\r$\n$\r$\n $_CLICK"
 !endif
 
 !ifdef MUI_UNWELCOMEPAGE
@@ -17,7 +19,7 @@
 
 !ifdef MUI_LICENSEPAGE
   ${LangFileString} MUI_TEXT_LICENSE_TITLE "Accordo di licenza"
-  ${LangFileString} MUI_TEXT_LICENSE_SUBTITLE "Leggi le condizioni dell'accordo di licenza prima di installare $(^NameDA)."
+  ${LangFileString} MUI_TEXT_LICENSE_SUBTITLE "Prima di installare $(^NameDA) leggi le condizioni dell'accordo di licenza."
   ${LangFileString} MUI_INNERTEXT_LICENSE_BOTTOM "Se accetti tutti i termini dell'accordo di licenza, seleziona 'Accetto' per continuare. Per installare $(^NameDA) è necessario accettare i termini dell'accordo di licenza."
   ${LangFileString} MUI_INNERTEXT_LICENSE_BOTTOM_CHECKBOX "Se accetti i termini dell'accordo di licenza, seleziona la casella sottostante. Per installare $(^NameDA) è necessario accettare i termini dell'accordo di licenza. $_CLICK"
   ${LangFileString} MUI_INNERTEXT_LICENSE_BOTTOM_RADIOBUTTONS "Se accetti i termini dell'accordo di licenza, seleziona la prima opzione sottostante. Per installare $(^NameDA) è necessario accettare i termini della licenza d'uso. $_CLICK"
@@ -79,7 +81,7 @@
   ${LangFileString} MUI_UNTEXT_FINISH_TITLE "Disinstallazione completata"
   ${LangFileString} MUI_UNTEXT_FINISH_SUBTITLE "La disinstallazione è stata completata correttamente."
   ${LangFileString} MUI_UNTEXT_ABORT_TITLE "Disinstallazione interrotta"
-  ${LangFileString} MUI_UNTEXT_ABORT_SUBTITLE "La disintallazione non è stata completata correttamente."
+  ${LangFileString} MUI_UNTEXT_ABORT_SUBTITLE "La disinstallazione non è stata completata correttamente."
 !endif
 
 !ifdef MUI_FINISHPAGE
@@ -115,7 +117,7 @@
 !endif
 
 !ifdef MUI_ABORTWARNING
-  ${LangFileString} MUI_TEXT_ABORTWARNING "Sei sicuro di voler interrompere l'installazione di $(^Name) ?"
+  ${LangFileString} MUI_TEXT_ABORTWARNING "Sei sicuro di voler interrompere l'installazione di $(^Name)?"
 !endif
 
 !ifdef MUI_UNABORTWARNING
