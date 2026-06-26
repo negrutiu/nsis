@@ -59,6 +59,7 @@ ManifestSupportedOS all
 !include "LogicLib.nsh"
 !include "WinVer.nsh"
 !include "Memento.nsh"
+!include "FileFunc.nsh"
 !include "WordFunc.nsh"
 !include "Util.nsh"
 !include "Integration.nsh"
