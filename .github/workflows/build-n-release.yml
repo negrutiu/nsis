@@ -81,7 +81,7 @@ jobs:
             automake-wrapper
   
       - name: Upgrade msys2/mingw32 (windows, gcc)
-        if: startsWith(matrix.os, '--disabled--') && startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'x86'
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'x86'
         uses: msys2/setup-msys2@v2
         with:
           msystem: msys
@@ -90,7 +90,7 @@ jobs:
           install: mingw-w64-i686-toolchain
           
       - name: Upgrade msys2/mingw64 (windows, gcc)
-        if: startsWith(matrix.os, '--disabled--') && startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'amd64'
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'amd64'
         uses: msys2/setup-msys2@v2
         with:
             msystem: msys
@@ -99,11 +99,11 @@ jobs:
             install: mingw-w64-x86_64-toolchain
 
       - name: Disable standalone mingw (windows, gcc)
-        if: startsWith(matrix.os, '--disabled--') && startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
         shell: python
         run: |
-          # the msys2 distribution of mingw-w64 is usually newer than the standalone one
-          # we'll disable the standalone one and let the build scripts find the msys2 one
+          # the default msys2/mingw distribution installed on Windows runners is ucrt-based
+          # we need a msvcrt-based distro, so we pull the latest mingw-w64 msys2 package
           import os
           os.rename('C:\\mingw32', 'C:\\mingw32.bak')
           os.rename('C:\\mingw64', 'C:\\mingw64.bak')
