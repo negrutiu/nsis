@@ -37,7 +37,7 @@ Disinstallazione di $(^Name)
 # ^UninstallingSubCaption
 : Disinstallazione
 # ^UnCompletedSubCaption
-: Disisntallazione completata
+: Disinstallazione completata
 # ^BackBtn
 < &Indietro
 # ^NextBtn
@@ -121,9 +121,9 @@ $(^NameDA) verrà disinstallato da questa cartella.\r\n$_CLICK
 # ^UninstallingSubText
 Rimozione da:
 # ^FileError
-Errore nell'apertura del file per la scrittura: \r\n\t"$0"\r\nSeleziona 'Termina' per interrompere l'installazione,\r\n'Riprova' per ritentare, oppure\r\n'Ignora' per saltare questo file.
+Errore nell'apertura del file in scrittura: \r\n\t"$0"\r\nSeleziona 'Termina' per interrompere l'installazione,\r\n'Riprova' per ritentare, oppure \r\n'Ignora' per saltare questo file.
 # ^FileError_NoIgnore
-Errore nell'apertura del file per la scrittura: \r\n\t"$0"\r\nSeleziona 'Riprova' per ritentare, oppure\r\n'Termina' per interrompere l'installazione
+Errore nell'apertura del file in scrittura: \r\n\t"$0"\r\nSeleziona 'Riprova' per ritentare, oppure \r\n'Termina' per interrompere l'installazione.
 # ^CantWrite
 "Impossibile scrivere: "
 # ^CopyFailed

@@ -2371,10 +2371,10 @@ int CEXEBuild::doCommand(int which_token, LineParser &line)
     return PS_OK;
     case TOK_TARGETCPU:
     {
-      int k = line.gettoken_enum(1, _T("x86\0amd64\0x64\0"));
+      int k = line.gettoken_enum(1, _T("x86\0x86\0amd64\0x64\0arm64\0"));
       if (-1 == k) PRINTHELP();
-      CEXEBuild::TARGETTYPE tt = TARGET_AMD64;
-      if (0 == k) tt = m_previous_x86_unicode ? TARGET_X86UNICODE : TARGET_X86ANSI;
+      CEXEBuild::TARGETTYPE tt = (CEXEBuild::TARGETTYPE)(k - (k > TARGET_AMD64)); // -1 for extra "x64" variant
+      if (k < TARGET_AMD64) tt = m_previous_x86_unicode ? TARGET_X86UNICODE : TARGET_X86ANSI;
       if (m_target_type != tt && PS_OK != change_target_architecture(tt))
       {
         ERROR_MSG(_T("Error: Unable to set target %") NPRIs _T(" (adequate stub not found?)\n"), _T("architecture"));
