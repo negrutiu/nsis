@@ -138,7 +138,7 @@ conf.Finish()
 
 confenv = defenv.Clone()
 conf = confenv.Configure()
-if not conf.TryAction('$RCCOM', '', '.rc')[0]:
+if not conf.TryAction('$RCCOM', 'LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US', '.rc')[0]:
     defenv['RCFLAGS'] = ''
 conf.Finish()
 

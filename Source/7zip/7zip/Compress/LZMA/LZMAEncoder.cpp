@@ -984,51 +984,51 @@ HRESULT CEncoder::GetOptimum(UInt32 position, UInt32 &backRes, UInt32 &lenRes)
         startLen = lenTest + 1;
         
       // if (_maxMode)
+      {
+        UInt32 lenTest2 = lenTest + 1;
+        UInt32 limit = MyMin(numAvailableBytesFull, lenTest2 + _numFastBytes);
+        for (; lenTest2 < limit && 
+            data[lenTest2] == data[(size_t)lenTest2 - backOffset]; lenTest2++);
+        lenTest2 -= lenTest + 1;
+        if (lenTest2 >= 2)
         {
-          UInt32 lenTest2 = lenTest + 1;
-          UInt32 limit = MyMin(numAvailableBytesFull, lenTest2 + _numFastBytes);
-          for (; lenTest2 < limit && 
-              data[lenTest2] == data[(size_t)lenTest2 - backOffset]; lenTest2++);
-          lenTest2 -= lenTest + 1;
-          if (lenTest2 >= 2)
+          CState state2 = state;
+          state2.UpdateRep();
+          UInt32 posStateNext = (position + lenTest) & _posStateMask;
+          UInt32 curAndLenCharPrice = 
+              price + _repMatchLenEncoder.GetPrice(lenTest - 2, posState) + 
+              _isMatch[state2.Index][posStateNext].GetPrice0() +
+              _literalEncoder.GetSubCoder(position + lenTest, data[(size_t)lenTest - 1])->GetPrice(
+              true, data[(size_t)lenTest - backOffset], data[lenTest]);
+          state2.UpdateChar();
+          posStateNext = (position + lenTest + 1) & _posStateMask;
+          UInt32 nextRepMatchPrice = curAndLenCharPrice + 
+              _isMatch[state2.Index][posStateNext].GetPrice1() +
+              _isRep[state2.Index].GetPrice1();
+          
+          // for(; lenTest2 >= 2; lenTest2--)
           {
-            CState state2 = state;
-            state2.UpdateRep();
-            UInt32 posStateNext = (position + lenTest) & _posStateMask;
-            UInt32 curAndLenCharPrice = 
-                price + _repMatchLenEncoder.GetPrice(lenTest - 2, posState) + 
-                _isMatch[state2.Index][posStateNext].GetPrice0() +
-                _literalEncoder.GetSubCoder(position + lenTest, data[(size_t)lenTest - 1])->GetPrice(
-                true, data[(size_t)lenTest - backOffset], data[lenTest]);
-            state2.UpdateChar();
-            posStateNext = (position + lenTest + 1) & _posStateMask;
-            UInt32 nextRepMatchPrice = curAndLenCharPrice + 
-                _isMatch[state2.Index][posStateNext].GetPrice1() +
-                _isRep[state2.Index].GetPrice1();
-            
-            // for(; lenTest2 >= 2; lenTest2--)
+            UInt32 offset = cur + lenTest + 1 + lenTest2;
+            while(lenEnd < offset)
+              _optimum[++lenEnd].Price = kIfinityPrice;
+            UInt32 curAndLenPrice = nextRepMatchPrice + GetRepPrice(
+                0, lenTest2, state2, posStateNext);
+            COptimal &optimum = _optimum[offset];
+            if (curAndLenPrice < optimum.Price) 
             {
-              UInt32 offset = cur + lenTest + 1 + lenTest2;
-              while(lenEnd < offset)
-                _optimum[++lenEnd].Price = kIfinityPrice;
-              UInt32 curAndLenPrice = nextRepMatchPrice + GetRepPrice(
-                  0, lenTest2, state2, posStateNext);
-              COptimal &optimum = _optimum[offset];
-              if (curAndLenPrice < optimum.Price) 
-              {
-                optimum.Price = curAndLenPrice;
-                optimum.PosPrev = cur + lenTest + 1;
-                optimum.BackPrev = 0;
-                optimum.Prev1IsChar = true;
-                optimum.Prev2 = true;
-                optimum.PosPrev2 = cur;
-                optimum.BackPrev2 = repIndex;
-              }
+              optimum.Price = curAndLenPrice;
+              optimum.PosPrev = cur + lenTest + 1;
+              optimum.BackPrev = 0;
+              optimum.Prev1IsChar = true;
+              optimum.Prev2 = true;
+              optimum.PosPrev2 = cur;
+              optimum.BackPrev2 = repIndex;
             }
           }
         }
       }
-    
+    }
+
     //    for(UInt32 lenTest = 2; lenTest <= newLen; lenTest++)
     if (newLen > numAvailableBytes)
     {
