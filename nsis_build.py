@@ -83,7 +83,7 @@ def setup_msvc_environ(arch):
     elif path.exists(vswhere := path.join(os.environ.get('PROGRAMFILES', '*'), 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')): pass
     else: raise Exception('vswhere.exe not found')
 
-    process = Popen([vswhere, '-latest', '-sort', '-format', 'json'], stdout=PIPE, stderr=PIPE)
+    process = Popen([vswhere, '-latest', '-prerelease', '-sort', '-format', 'json'], stdout=PIPE, stderr=PIPE)
     cout, cerr = process.communicate()
     process.wait()
     # print(cout.decode('utf-8'))
