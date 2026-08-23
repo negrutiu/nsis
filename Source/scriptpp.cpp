@@ -720,7 +720,7 @@ int CEXEBuild::pp_searchreplacestring(LineParser&line)
     return PS_ERROR;
   }
   SCRIPT_MSG(_T("!searchreplace: \"%") NPRIs _T("\"=\"%") NPRIs _T("\"\n"), define,(TCHAR*)valout.get());
-  return S_OK;
+  return PS_OK;
 }
 
 int CEXEBuild::pp_searchparsestring(LineParser&line)
@@ -1499,8 +1499,11 @@ int CEXEBuild::pp_assert(LineParser&line)
     tstring buf = _T("");
     if (!*message)
     {
-      for (int i = 1, c = line.getnumtokens() - 1, any = 0; i < c; ++i)
-        buf += (_T(" ") + !(any++)), buf += line.gettoken_str(i);
+      for (UINT i = 1, c = line.getnumtokens() - 1, any = 0; i < c; ++i)
+      {
+        buf += (any++ ? _T(" ") : _T(""));
+        buf += line.gettoken_str(i);
+      }
       message = buf.c_str();
     }
     ERROR_MSG(_T("%") NPRIs _T(": %") NPRIs _T("\n"), get_commandtoken_name(TOK_P_ASSERT), message);

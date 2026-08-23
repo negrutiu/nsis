@@ -266,7 +266,7 @@ const char* NSISRT_setlocale_wincp(int cat, unsigned int cp)
   if (cp <= 1) return CP_ACP == cp ? setlocale_ACP(cat) : setlocale_OEM(cat);
   char buf[40];
   const char *p, *p1 = 0, *p2 = 0;
-  sprintf(buf, ".CP%u", cp);
+  snprintf(buf, COUNTOF(buf), ".CP%u", cp);
   p = setlocale(cat, &buf[1]); // "CP%u"
   if (!p) p = setlocale(cat, buf); // ".CP%u" this is the format used by MSVCRT?
   if (!p)
@@ -281,8 +281,8 @@ const char* NSISRT_setlocale_wincp(int cat, unsigned int cp)
     case 20932: p1 = "EUCJP", p2 = "euc-JP"; break;
     case 65001: p1 = "UTF-8", p2 = "utf8"; break;
     default:
-      if (cp >= 28591 && cp <= 28599) sprintf(buf, "ISO-8859-%u", cp - 28590), p1 = buf;
-      if (cp == 28603 || cp == 28605) sprintf(buf, "ISO-8859-%u", (cp - 28600) + 10), p1 = buf;
+      if (cp >= 28591 && cp <= 28599) snprintf(buf, COUNTOF(buf), "ISO-8859-%u", cp - 28590), p1 = buf;
+      if (cp == 28603 || cp == 28605) snprintf(buf, COUNTOF(buf), "ISO-8859-%u", cp - 28600 + 10), p1 = buf;
     }
     if (!(p = setlocale(cat, p1))) p = setlocale(cat, p2);
   }

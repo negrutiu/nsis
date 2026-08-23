@@ -31,6 +31,8 @@
 #include <richedit.h>
 #undef _RICHEDIT_VER
 
+
+
 #define DpiAwarePerMonitor2() ( FALSE ) // Not yet
 #define DpiAwarePerMonitor() ( FALSE )
 #define SupportsWNT4() ( sizeof(void*) == 4 && !DpiAwarePerMonitor() ) // NT4 does not support the MultiMon API

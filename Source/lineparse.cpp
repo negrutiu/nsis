@@ -247,10 +247,10 @@ double LineParser::gettoken_number(int token, int *success/*=0*/) const
   return parse_number(m_tokens[token],success);
 }
 
-int LineParser::gettoken_binstrdata(int token, char*buffer, int bufcap) const
+int LineParser::gettoken_binstrdata(int token, char*buffer, size_t bufcap) const
 {
   const TCHAR*p=gettoken_str(token);
-  int a,b,c,d=0;
+  unsigned int a,b,c,d=0;
   while (*p)
   {
     a=*p;

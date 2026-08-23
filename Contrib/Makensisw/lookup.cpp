@@ -37,12 +37,12 @@ template<class T> static LPWSTR SmartStrTToW(T*Src, LPWSTR Dst, UINT cch)
 #define StrBase10ToSInt(s) StrToSInt((s), 10)
 template<class T> static int WINAPI StrToSInt(const T*Str, UINT Base = 0)
 {
-  if (Base && !(*Str >= '0' && *Str <= '9') && *Str != '-') return 0; // Don't allow leading space
-  int v, succ;
-  if (sizeof(*Str) > 1)
-    succ = StrToIntExW((WCHAR*) Str, Base != 10 ? STIF_SUPPORT_HEX : STIF_DEFAULT, &v);
-  else
-    succ = StrToIntExA((CHAR *) Str, Base != 10 ? STIF_SUPPORT_HEX : STIF_DEFAULT, &v);
+  if (Base && !(*Str >= '0' && *Str <= '9') && *Str != '-')
+    return 0; // Don't allow leading space
+  const UINT stif_default = 0, stif_support_hex = 1; // This is an enum in the SDK, we can't detect it
+  BOOL (WINAPI* pfnSTIE)(LPCVOID, UINT, int*);
+  (FARPROC&)pfnSTIE = sizeof(*Str) > 1 ? (FARPROC)&StrToIntExW : (FARPROC)&StrToIntExA;
+  int v, succ = pfnSTIE(Str, Base != 10 ? stif_support_hex : stif_default, &v);
   return succ ? v : 0; // Not full base support, we only need 10 and 16
 }
 

@@ -96,8 +96,7 @@ local inflate_huft *fixed_tl;
 local inflate_huft *fixed_td;
 
 /* copy as much as possible from the sliding window to the output area */
-local void ZEXPORT inflate_flush(z)
-z_streamp z;
+local void ZEXPORT inflate_flush(z_streamp z)
 {
   inflate_blocks_statef *s = &z->blocks;
   uInt n;

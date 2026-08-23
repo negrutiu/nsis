@@ -23,7 +23,8 @@ Copyright 2002-2026 Joost Verburg
 !include InstallOptions.nsh
 !include LangFile.nsh
 !include WinMessages.nsh
-!include Util.nsh
+!include LogicLib.nsh
+!include Util.nsh ; IsHighContrastModeActive
 
 Var MUI_TEMP1
 Var MUI_TEMP2
