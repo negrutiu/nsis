@@ -69,7 +69,7 @@ static tokenType tokenlist[TOK__LAST] =
 {TOK_DIRTEXT,_T("DirText"),0,4,_T("[directory_page_description] [directory_page_subtext] [browse_button_text] [browse_dlg_text]"),TP_PG},
 //{TOK_DIRSHOW,_T("DirShow"),1,0,_T("(show|hide)"),TP_PG},
 {TOK_DIRSHOW,_T("DirShow"),0,0,_T("doesn't currently work"),TP_ALL},
-{TOK_DIRVAR,_T("DirVar"),1,0,_T("$(user_var: dir in/out))"),TP_PAGEEX},
+{TOK_DIRVAR,_T("DirVar"),1,0,_T("$(user_var: dir in/out)"),TP_PAGEEX},
 {TOK_DIRVERIFY,_T("DirVerify"),1,0,_T("auto|leave"),TP_PAGEEX},
 {TOK_GETINSTDIRERROR,_T("GetInstDirError"),1,0,_T("$(user_var: error output)"),TP_CODE},
 {TOK_ROOTDIRINST,_T("AllowRootDirInstall"),1,0,_T("(true|false)"),TP_GLOBAL},
@@ -149,7 +149,7 @@ static tokenType tokenlist[TOK__LAST] =
 {TOK_LOGSET,_T("LogSet"),1,0,_T("on|off"),TP_CODE},
 {TOK_LOGTEXT,_T("LogText"),1,0,_T("text"),TP_CODE},
 {TOK_MESSAGEBOX,_T("MessageBox"),2,6,_T("mode messagebox_text [/SD return] [return_check label_to_goto_if_equal [return_check2 label2]]\n    mode=modeflag[|modeflag[|modeflag[...]]]\n    ")
-                                _T("modeflag=(MB_ABORTRETRYIGNORE|MB_OK|MB_OKCANCEL|MB_RETRYCANCEL|MB_YESNO|MB_YESNOCANCEL|MB_ICONEXCLAMATION|MB_ICONINFORMATION|MB_ICONQUESTION|MB_ICONSTOP|MB_USERICON|MB_TOPMOST|MB_SETFOREGROUND|MB_RIGHT"),TP_CODE},
+                                _T("modeflag=(MB_ABORTRETRYIGNORE|MB_OK|MB_OKCANCEL|MB_RETRYCANCEL|MB_YESNO|MB_YESNOCANCEL|MB_ICONEXCLAMATION|MB_ICONINFORMATION|MB_ICONQUESTION|MB_ICONSTOP|MB_USERICON|MB_TOPMOST|MB_SETFOREGROUND|MB_RIGHT)"),TP_CODE},
 {TOK_NOP,_T("Nop"),0,0,_T(""),TP_CODE},
 {TOK_NAME,_T("Name"),1,1,_T("installer_name [installer_name_doubled_ampersands]"),TP_GLOBAL},
 {TOK_OUTFILE,_T("OutFile"),1,0,_T("install_output.exe"),TP_GLOBAL},
