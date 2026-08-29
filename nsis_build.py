@@ -10,10 +10,10 @@ from nsis_version import *
 
 scriptdir = path.dirname(path.abspath(__file__))
 
-def run(args):
+def run(args, cwd=None):
     """ Execute subprocess and raise exit code exceptions. """
     print(f">> {args}")
-    exitcode = Popen(args).wait()
+    exitcode = Popen(args, cwd=cwd).wait()
     if exitcode != 0:
         raise OSError(exitcode, f"subprocess exit code {exitcode}")
 
@@ -145,10 +145,10 @@ def build_zlib(compiler, arch, zlibdir):
     curdir = path.curdir
     os.chdir(zlibdir)
     if compiler == 'gcc' and os.name == 'nt':
-        args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
+        args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll', 'libz.a']
     elif compiler == 'gcc' and os.name != 'nt':
         prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
-        args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
+        args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll', 'libz.a']
     elif compiler == 'msvc':
         args = [f'cmd.exe', '/c', 'call', "vcvarsall.bat", arch, '&&', 'nmake.exe', '-f', 'win32/Makefile.msc', f'LOC=/MT', 'zlib1.dll', 'zdll.lib']
     run(args)
@@ -170,12 +170,14 @@ def build_cppunit(compiler, arch, cppunitdir):
             rf"--bindir={win_to_posix(path.join(cppunitdir, 'bin'))}"
             ]
         for args in [
-            ['sh', './autogen.sh'],
-            ['sh', './configure', f'MAKE={prefix}make'] + outargs + ['LDFLAGS=-static', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
-            [f'{prefix}make'],
-            [f'{prefix}make', 'install']
+            {'args':['sh', './autogen.sh'], 'cwd':None},
+            {'args':['sh', './configure', f'MAKE={prefix}make'] + outargs + ['LDFLAGS=-static', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'], 'cwd':None},
+            {'args':[f'{prefix}make'],            'cwd':path.join(cppunitdir, 'include')},
+            {'args':[f'{prefix}make'],            'cwd':path.join(cppunitdir, 'src')},
+            {'args':[f'{prefix}make', 'install'], 'cwd':path.join(cppunitdir, 'include')},
+            {'args':[f'{prefix}make', 'install'], 'cwd':path.join(cppunitdir, 'src')},
             ]:
-            run(args)
+            run(args['args'], args['cwd'])
     elif compiler == 'msvc':
         args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'cppunit', 'cppunit.vcxproj'), '/p:Configuration=Release', f'/p:Platform={vars["archName"]}', f'/p:PlatformToolset={vars["platformToolset" ]}']
         run(args)
