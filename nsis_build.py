@@ -170,12 +170,14 @@ def build_cppunit(compiler, arch, cppunitdir):
             rf"--bindir={win_to_posix(path.join(cppunitdir, 'bin'))}"
             ]
         for args in [
-            ['sh', './autogen.sh'],
-            ['sh', './configure', f'MAKE={prefix}make'] + outargs + ['LDFLAGS=-static', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'],
-            [f'{prefix}make'],
-            [f'{prefix}make', 'install']
+            {'args':['sh', './autogen.sh'], 'cwd':None},
+            {'args':['sh', './configure', f'MAKE={prefix}make'] + outargs + ['LDFLAGS=-static', '--disable-silent-rules', '--disable-dependency-tracking', '--disable-doxygen', '--disable-html-docs', '--disable-latex-docs'], 'cwd':None},
+            {'args':[f'{prefix}make'],            'cwd':path.join(cppunitdir, 'include')},
+            {'args':[f'{prefix}make'],            'cwd':path.join(cppunitdir, 'src')},
+            {'args':[f'{prefix}make', 'install'], 'cwd':path.join(cppunitdir, 'include')},
+            {'args':[f'{prefix}make', 'install'], 'cwd':path.join(cppunitdir, 'src')},
             ]:
-            run(args)
+            run(args['args'], args['cwd'])
     elif compiler == 'msvc':
         args = ['cmd.exe', '/c', 'call', 'vcvarsall.bat', arch, '&&', 'msbuild', '/m', '/t:build', path.join(cppunitdir, 'src', 'cppunit', 'cppunit.vcxproj'), '/p:Configuration=Release', f'/p:Platform={vars["archName"]}', f'/p:PlatformToolset={vars["platformToolset" ]}']
         run(args)
