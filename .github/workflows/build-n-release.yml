@@ -68,7 +68,7 @@ jobs:
           py -0p
           pip list
 
-      - name: Upgrade msys2 (windows, gcc)
+      - name: Install msys2 dependencies (windows, gcc)
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
         uses: msys2/setup-msys2@v2
         with:
@@ -79,35 +79,40 @@ jobs:
             libtool
             autoconf-wrapper
             automake-wrapper
-  
-      - name: Upgrade msys2/mingw32 (windows, gcc)
-        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'x86'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: msys
-          release: false
-          update: true
-          install: mingw-w64-i686-toolchain
-          
-      - name: Upgrade msys2/mingw64 (windows, gcc)
-        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'amd64'
-        uses: msys2/setup-msys2@v2
-        with:
-            msystem: msys
-            release: false
-            update: true
-            install: mingw-w64-x86_64-toolchain
 
-      - name: Disable standalone mingw (windows, gcc)
+      - name: Remove default mingw (windows, gcc)
         if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc'
         shell: python
         run: |
-          # the default msys2/mingw distribution installed on Windows runners is ucrt-based
-          # we need a msvcrt-based distro, so we pull the latest mingw-w64 msys2 package
+          # mingw distribution pre-installed on Windows runners is ucrt-based
+          # we'll deploy a different distro that is msvcrt-based
           import os
           os.rename('C:\\mingw32', 'C:\\mingw32.bak')
           os.rename('C:\\mingw64', 'C:\\mingw64.bak')
-            
+
+      # https://winlibs.com/
+      # https://github.com/brechtsanders/winlibs_mingw/tags
+      # https://github.com/marketplace/actions/setup-winlibs
+      - name: Install winlibs/mingw32 (windows, gcc)
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'x86'
+        uses: bwoodsend/setup-winlibs-action@v1
+        with:
+          tag: 16.2.0posix-14.0.0-msvcrt-r1
+          with_clang: false
+          destination: C:/
+          add_to_path: false
+          architecture: i686
+
+      - name: Install winlibs/mingw32 (windows, gcc)
+        if: startsWith(matrix.os, 'windows') && matrix.compiler == 'gcc' && matrix.arch == 'amd64'
+        uses: bwoodsend/setup-winlibs-action@v1
+        with:
+          tag: 16.2.0posix-14.0.0-msvcrt-r1
+          with_clang: false
+          destination: C:/
+          add_to_path: false
+          architecture: x86_64
+
       - name: Print debug info (macos)
         if: startsWith(matrix.os, 'macos')
         run: |
