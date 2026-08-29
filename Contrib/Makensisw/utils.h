@@ -145,6 +145,7 @@ template<class T> HKEY GetRegRootKey(const T*Str)
 	return (HKEY) NULL;
 }
 DWORD RegOpenKeyForReading(HKEY hRoot, LPCTSTR SubKey, HKEY*pKey);
+BOOL RegHasValue(HKEY hKey, LPCTSTR SubKey, LPCTSTR Name);
 
 bool FileExists(const TCHAR *fname);
 bool OpenUrlInDefaultBrowser(HWND hwnd, LPCSTR Url);
