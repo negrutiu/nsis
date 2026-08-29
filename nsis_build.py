@@ -145,10 +145,10 @@ def build_zlib(compiler, arch, zlibdir):
     curdir = path.curdir
     os.chdir(zlibdir)
     if compiler == 'gcc' and os.name == 'nt':
-        args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
+        args = [f'mingw32-make.exe', '-fwin32/Makefile.gcc', f'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll', 'libz.a']
     elif compiler == 'gcc' and os.name != 'nt':
         prefixes = {'x86': 'i686-w64-mingw32-', 'amd64': 'x86_64-w64-mingw32-'}
-        args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll']
+        args = ['make', '-fwin32/Makefile.gcc', f'PREFIX={prefixes[arch]}', 'LOC=-D_WIN32_WINNT=0x0400 -static', 'zlib1.dll', 'libz.a']
     elif compiler == 'msvc':
         args = [f'cmd.exe', '/c', 'call', "vcvarsall.bat", arch, '&&', 'nmake.exe', '-f', 'win32/Makefile.msc', f'LOC=/MT', 'zlib1.dll', 'zdll.lib']
     run(args)
