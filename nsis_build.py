@@ -10,10 +10,10 @@ from nsis_version import *
 
 scriptdir = path.dirname(path.abspath(__file__))
 
-def run(args):
+def run(args, cwd=None):
     """ Execute subprocess and raise exit code exceptions. """
     print(f">> {args}")
-    exitcode = Popen(args).wait()
+    exitcode = Popen(args, cwd=cwd).wait()
     if exitcode != 0:
         raise OSError(exitcode, f"subprocess exit code {exitcode}")
 
