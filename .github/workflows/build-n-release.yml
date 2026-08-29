@@ -47,11 +47,11 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y scons mingw-w64
 
-      - name: Upgrade python (windows)
-        if: startsWith(matrix.os, 'windows')
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+      # - name: Upgrade python (windows)
+      #   if: startsWith(matrix.os, 'windows')
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.x'
 
       - name: Install dependencies (windows)
         if: startsWith(matrix.os, 'windows')
