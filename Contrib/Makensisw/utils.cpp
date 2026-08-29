@@ -483,6 +483,16 @@ void CompileNSISScript() {
   g_sdata.thread=CreateThread(NULL,0,MakeNSISProc,0,0,&tid);
 }
 
+BOOL RegHasValue(HKEY hKey, LPCTSTR SubKey, LPCTSTR Name)
+{
+    DWORD ec = RegOpenKeyForReading(hKey, SubKey, &hKey), rt;
+    if (ec)
+        return FALSE;
+    ec = RegQueryValueEx(hKey, Name, NULL, &rt, NULL, NULL);
+    RegCloseKey(hKey);
+    return ec ? FALSE : MAKELONG(TRUE, rt);
+}
+
 static DWORD RegWriteString(HKEY hKey, LPCTSTR Name, LPCTSTR Data)
 {
   const DWORD cb = (lstrlen(Data) + 1) * sizeof(*Data);

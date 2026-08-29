@@ -756,7 +756,11 @@ INT_PTR CALLBACK DialogProc(HWND hwndDlg, UINT msg, WPARAM wParam, LPARAM lParam
         {
           TCHAR dir[MAX_PATH];
           GetSystemDirectory(dir, COUNTOF(dir));
-          ShellExecute(hwndDlg, NULL, TEXT("control.exe"), TEXT("appwiz.cpl"), dir, SW_SHOW);
+          if (GetKeyState(VK_CONTROL) < 0 || !RegHasValue(HKEY_CLASSES_ROOT, TEXT("ms-settings"), TEXT("URL Protocol")) ||
+              (SIZE_T)ShellExecute(hwndDlg, NULL, TEXT("ms-settings:appsfeatures"), NULL, dir, SW_SHOW) <= 32)
+          {
+            ShellExecute(hwndDlg, NULL, TEXT("control.exe"), TEXT("appwiz.cpl"), dir, SW_SHOW);
+          }
           break;
         }
         case IDM_TEST:
