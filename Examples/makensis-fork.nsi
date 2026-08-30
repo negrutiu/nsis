@@ -5,35 +5,46 @@
 !pragma warning warning 7010 ; File /NonFatal
 
 
+!if ${NSIS_PTR_SIZE} > 4
+  !define BITS 64
+  !define NAMESUFFIX " (64 bit)"
+  !define ARCH "amd64"
+!else
+  !define BITS 32
+  !define NAMESUFFIX ""
+  !define ARCH "x86"
+!endif
+
+; External definitions
 !define /ifndef VER_MAJOR 0
 !define /ifndef VER_MINOR 0
 !define /ifndef VER_REVISION 0
 !define /ifndef VER_BUILD 0
 
-!define /ifndef VERSION 'anonymous-build'
+!define /ifndef VERSION "${VER_MAJOR}.${VER_MINOR}.${VER_REVISION}.${VER_BUILD}"
 
-!ifndef LINK_INFO
-  !define LINK_INFO "https://nsis.sourceforge.io/"
-!endif
-!ifndef LINK_HELP
-  !define LINK_HELP "https://nsis.sourceforge.io/Support"
-!endif
+!define /ifndef LINK_INFO "https://nsis.sourceforge.io"
+!define /ifndef LINK_HELP "https://nsis.sourceforge.io/Support"
+
+!define /ifndef VER_PRODUCTNAME "Nullsoft Install System"
+!define /ifndef VER_PRODUCTVERSION "${VERSION}"
+!define /ifndef VER_COMMENTS ""
+!define /ifndef VER_COMPANYNAME "Nullsoft and Contributors"
+!define /ifndef VER_FILEVERSION "${VERSION}"
+!define /ifndef VER_FILEDESCRIPTION "NSIS Setup"
+!define /ifndef VER_LEGALCOPYRIGHT "https://nsis.sf.net/License"
+!define /ifndef VER_LEGALTRADEMARKS ""
+
+!define /ifndef EXTRA_WELCOME_TEXT ""
+
+!define /ifndef UNINST_DISPLAYNAME "Nullsoft Install System${NAMESUFFIX}"
+!define /ifndef UNINST_PUBLISHER "Nullsoft and Contributors"
+!define /ifndef UNINST_COMMENTS ""
+
+!define /ifndef OUTFILE "..\nsis-${VERSION}-setup-${ARCH}.exe"
 
 ;--------------------------------
 ;Configuration
-
-!if ${NSIS_PTR_SIZE} > 4
-  !define BITS 64
-  !define NAMESUFFIX " (64 bit)"
-!else
-  !define BITS 32
-  !define NAMESUFFIX ""
-!endif
-
-!ifndef OUTFILE
-  !define OUTFILE "..\nsis${BITS}-${VERSION}-setup.exe"
-  !searchreplace OUTFILE "${OUTFILE}" nsis32 nsis
-!endif
 
 OutFile "${OUTFILE}"
 Unicode true
@@ -93,7 +104,6 @@ Caption "NSIS Setup - ${VERSION}${NAMESUFFIX}"
 !define MUI_COMPONENTSPAGE_SMALLDESC
 
 ;Pages
-!define /ifndef EXTRA_WELCOME_TEXT ""
 !define MUI_WELCOMEPAGE_TITLE "Welcome to the NSIS Setup Wizard"
 !define MUI_WELCOMEPAGE_TEXT "This wizard will guide you through the installation of NSIS (Nullsoft Scriptable Install System), the next generation of the Windows installer and uninstaller system that doesn't suck and isn't huge.$\r$\n$\r$\nNSIS includes a Modern User Interface, LZMA compression, support for multiple languages and an easy plug-in system.${EXTRA_WELCOME_TEXT}$\r$\n$\r$\n$_CLICK"
 
@@ -129,43 +139,32 @@ Page custom PageReinstall PageLeaveReinstall
 ;--------------------------------
 ;Version information
 
-!ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
 VIFileVersion    ${VER_MAJOR}.${VER_MINOR}.${VER_REVISION}.${VER_BUILD}
 VIProductVersion ${VER_MAJOR}.${VER_MINOR}.${VER_REVISION}.${VER_BUILD}
-!ifdef VER_PRODUCTNAME
+
+!if "${VER_PRODUCTNAME}" != ""
 	VIAddVersionKey "ProductName" "${VER_PRODUCTNAME}"
-!else
-	VIAddVersionKey "ProductName" "NSIS Setup"
 !endif
-!ifdef VER_PRODUCTVERSION
+!if "${VER_PRODUCTVERSION}" != ""
 	VIAddVersionKey "ProductVersion" "${VER_PRODUCTVERSION}"
-!else
-	VIAddVersionKey "ProductVersion" "${VERSION}"
 !endif
-!ifdef VER_COMMENTS
+!if "${VER_COMMENTS}" != ""
 	VIAddVersionKey "Comments" "${VER_COMMENTS}"
 !endif
-!ifdef VER_COMPANYNAME
+!if "${VER_COMPANYNAME}" != ""
 	VIAddVersionKey "CompanyName" "${VER_COMPANYNAME}"
 !endif
-!ifdef VER_FILEVERSION
+!if "${VER_FILEVERSION}" != ""
 	VIAddVersionKey "FileVersion" "${VER_FILEVERSION}"
-!else
-	VIAddVersionKey "FileVersion" "${VERSION}"
 !endif
-!ifdef VER_FILEDESCRIPTION
+!if "${VER_FILEDESCRIPTION}" != ""
 	VIAddVersionKey "FileDescription" "${VER_FILEDESCRIPTION}"
-!else
-	VIAddVersionKey "FileDescription" "NSIS Setup"
 !endif
-!ifdef VER_LEGALCOPYRIGHT
+!if "${VER_LEGALCOPYRIGHT}" != ""
 	VIAddVersionKey "LegalCopyright" "${VER_LEGALCOPYRIGHT}"
-!else
-	VIAddVersionKey "LegalCopyright" "http://nsis.sf.net/License"
 !endif
-!ifdef VER_LEGALTRADEMARKS
+!if "${VER_LEGALTRADEMARKS}" != ""
 	VIAddVersionKey "LegalTrademarks" "${VER_LEGALTRADEMARKS}"
-!endif
 !endif
 
 ;--------------------------------
@@ -895,10 +894,6 @@ SectionGroupEnd
 
 Section -UninstallerAndAssoc SecUninstallerAndAssoc
 
-
-
-
-
   SetDetailsPrint textonly
   DetailPrint "Updating Registry..."
   SetDetailsPrint listonly
@@ -938,12 +933,10 @@ Section -UninstallerAndAssoc SecUninstallerAndAssoc
   ${NotifyShell_AssocChanged}
 
   WriteRegStr HKLM "Software\NSIS" "" $INSTDIR
-!ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
-  WriteRegDword HKLM "Software\NSIS" "VersionMajor" "${VER_MAJOR}"
-  WriteRegDword HKLM "Software\NSIS" "VersionMinor" "${VER_MINOR}"
-  WriteRegDword HKLM "Software\NSIS" "VersionRevision" "${VER_REVISION}"
-  WriteRegDword HKLM "Software\NSIS" "VersionBuild" "${VER_BUILD}"
-!endif
+  WriteRegDWORD HKLM "Software\NSIS" "VersionMajor" ${VER_MAJOR}
+  WriteRegDWORD HKLM "Software\NSIS" "VersionMinor" ${VER_MINOR}
+  WriteRegDWORD HKLM "Software\NSIS" "VersionRevision" ${VER_REVISION}
+  WriteRegDWORD HKLM "Software\NSIS" "VersionBuild" ${VER_BUILD}
 
   SetDetailsPrint textonly
   DetailPrint "Creating Uninstaller..."
@@ -952,18 +945,23 @@ Section -UninstallerAndAssoc SecUninstallerAndAssoc
   WriteRegStr HKLM "${REG_UNINST_KEY}" "UninstallString" '"$INSTDIR\uninst-nsis.exe"'
   WriteRegStr HKLM "${REG_UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninst-nsis.exe" /S'
   WriteRegStr HKLM "${REG_UNINST_KEY}" "InstallLocation" "$INSTDIR"
-  WriteRegStr HKLM "${REG_UNINST_KEY}" "DisplayName" "Nullsoft Install System${NAMESUFFIX}"
+!if "${UNINST_DISPLAYNAME}" != ""
+  WriteRegStr HKLM "${REG_UNINST_KEY}" "DisplayName" "${UNINST_DISPLAYNAME}"
+!endif
   WriteRegStr HKLM "${REG_UNINST_KEY}" "DisplayIcon" "$INSTDIR\NSIS.exe"
   WriteRegStr HKLM "${REG_UNINST_KEY}" "DisplayVersion" "${VERSION}"
-!ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
-  WriteRegDWORD HKLM "${REG_UNINST_KEY}" "VersionMajor" "${VER_MAJOR}" ; Required by WACK
-  WriteRegDWORD HKLM "${REG_UNINST_KEY}" "VersionMinor" "${VER_MINOR}" ; Required by WACK
+  WriteRegStr HKLM "${REG_UNINST_KEY}" "Comments" "Unofficial NSIS fork"
+
+  WriteRegDWORD HKLM "${REG_UNINST_KEY}" "VersionMajor" ${VER_MAJOR}    ; Required by WACK
+  WriteRegDWORD HKLM "${REG_UNINST_KEY}" "VersionMinor" ${VER_MINOR}    ; Required by WACK
+
+!if "${UNINST_PUBLISHER}" != ""
+  WriteRegStr HKLM "${REG_UNINST_KEY}" "Publisher" "${UNINST_PUBLISHER}"    ; Required by WACK
 !endif
-  WriteRegStr HKLM "${REG_UNINST_KEY}" "Publisher" "Nullsoft and Contributors" ; Required by WACK
   WriteRegStr HKLM "${REG_UNINST_KEY}" "URLInfoAbout" "${LINK_INFO}"
   WriteRegStr HKLM "${REG_UNINST_KEY}" "HelpLink" "${LINK_HELP}"
-  WriteRegDWORD HKLM "${REG_UNINST_KEY}" "NoModify" "1"
-  WriteRegDWORD HKLM "${REG_UNINST_KEY}" "NoRepair" "1"
+  WriteRegDWORD HKLM "${REG_UNINST_KEY}" "NoModify" 1
+  WriteRegDWORD HKLM "${REG_UNINST_KEY}" "NoRepair" 1
   ${MakeARPInstallDate} $1
   WriteRegStr HKLM "${REG_UNINST_KEY}" "InstallDate" $1
 

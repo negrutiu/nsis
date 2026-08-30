@@ -141,17 +141,20 @@ def build_nsis_installer(
         mode = stat.S_IMODE(os.lstat(makensis).st_mode)
         os.chmod(makensis, mode | stat.S_IXUSR)     # `chmod u+x makensis`
 
+    version = nsis_version(major_version, minor_version, revision_number, build_number)
+    outfile = outfile if outfile is not None else path.join(distro_dir, f"nsis-{version}-{nsis_distro_name()}-{arch}.exe")
     args = [
         makensis,
-        f'-DOUTFILE={outfile if outfile is not None else path.join(distro_dir, f"nsis-{nsis_version(major_version, minor_version, revision_number, build_number)}-{nsis_distro_name()}-{arch}.exe")}',
-        f'-DVERSION={nsis_version(major_version, minor_version, revision_number, build_number)}',
+        f'-DOUTFILE={outfile}',
+        f'-DVERSION={version}',
         f'-DVER_MAJOR={major_version}',
         f'-DVER_MINOR={minor_version}',
         f'-DVER_REVISION={revision_number}',
         f'-DVER_BUILD={nsis_build_number(build_number)}',
+        r'-DVER_PRODUCTNAME=Nullsoft Install System Fork',
+        r'-DVER_LEGALCOPYRIGHT=https://github.com/negrutiu/nsis',
+        f'-DVER_COMMENTS=https://github.com/negrutiu/nsis/releases/tag/v{version}',
         r'-DLINK_INFO=https://github.com/negrutiu/nsis',
-        r'-DVER_PRODUCTNAME=Unofficial NSIS fork by Marius Negrutiu',
-        r'-DVER_LEGALTRADEMARKS=https://github.com/negrutiu/nsis',
         r'-DEXTRA_WELCOME_TEXT=$\r$\n$\r$\n$\r$\n(*) This is an unofficial fork from https://github.com/negrutiu/nsis$\r$\n',
         f'-V{verbose_level}',
         path.join(distro_dir, 'Examples', 'makensis-fork.nsi')
