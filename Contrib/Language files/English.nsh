@@ -127,3 +127,8 @@
   ${LangFileString} MULTIUSER_INNERTEXT_INSTALLMODE_ALLUSERS "Install for anyone using this computer"
   ${LangFileString} MULTIUSER_INNERTEXT_INSTALLMODE_CURRENTUSER "Install just for me"
 !endif
+
+!if 0
+  ${LangFileString} LANGDLL_WINDOWTITLE "Installer Language"
+  ${LangFileString} LANGDLL_INFO "Please select a language."
+!endif

@@ -2,9 +2,13 @@
 
 \H{v3.13} 3.13
 
-Released on ???? ??th, ????
+Released on September 27th, 2026
 
 \S1{v3.13-cl} Changelog
+
+\S2{} Minor Changes
+
+\b Fixed nsExec::ExecToLog crash (\W{http://sf.net/p/nsis/bugs/1323}{bug #1323})
 
 \S2{} Translations
 
